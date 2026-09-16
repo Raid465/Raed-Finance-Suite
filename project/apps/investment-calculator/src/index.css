@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  background: #0f1117;
+  color: #e8e8f0;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+
+/* Classic language switch: intentionally simple, no blur, gradients, or glass effects. */
+.global-lang-toggle {
+  position: fixed;
+  z-index: 9999;
+  top: 14px;
+  right: 16px;
+  padding: 8px 12px;
+  border: 1px solid #2e3350;
+  border-radius: 6px;
+  background: #1a1d2e;
+  color: #e8e8f0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.global-lang-toggle:hover { background: #222640; border-color:#4f8cff; }
+html[dir="rtl"] .global-lang-toggle { right: auto; left: 16px; }
+
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #4f8cff;outline-offset:2px}

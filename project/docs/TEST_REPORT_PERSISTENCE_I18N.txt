@@ -1,0 +1,25 @@
+Raed Finance Suite - Persistence + Translation Test Report
+Date: 2026-09-16
+
+PASS - Dashboard defaults to English
+PASS - Investment Calculator defaults to English and keeps Arabic toggle
+PASS - Stock Comparison defaults to English and keeps Arabic toggle
+PASS - ETF defaults to English/LTR
+PASS - ETF initial visible markup contains no Arabic UI labels
+PASS - ETF Tools source labels are English
+PASS - ETF Market Movers dynamic headings are English
+PASS - Every Arabic UI literal in the ETF production script has an English translation mapping (0 uncovered lines)
+PASS - Saudi ETF uses English product name in English mode when available
+PASS - Watchlist browser persistent backup enabled (localStorage)
+PASS - Watchlist backend persistent storage enabled outside extracted project
+PASS - Persistent JSON writes are atomic (fsync + os.replace)
+PASS - Watchlist add writes symbol to disk
+PASS - Watchlist reload reads the saved symbol back from disk
+PASS - Existing ETF caching/concurrency tests
+PASS - ETF health, quote, analysis and history routes under offline provider stub
+PASS - Python syntax/compile checks
+PASS - ETF JavaScript syntax checks
+PASS - Stock API JavaScript syntax check
+PASS - Launcher fixed ports / Windows npm.cmd regression checks
+
+Live Yahoo / external-provider requests were not executed in this environment. Run "Run Tests.bat" while "Start Raed Finance.bat" is running on the target Windows machine for the live-provider checks.

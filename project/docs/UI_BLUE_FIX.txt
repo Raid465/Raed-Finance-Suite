@@ -1,0 +1,9 @@
+Raed Finance Suite — BLUE UI v3
+
+Verified rendered colors:
+- ETF Saudi ETFs active tab: #2563EB
+- ETF Mutual Funds active tab: #2563EB
+- Active ETF sub-tabs: #2563EB
+- Dashboard Open buttons: #2563EB
+
+The launcher also stops older Raed Finance Suite Python/Node servers on the suite ports before starting, preventing an older extracted copy from being shown by localhost.

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Raed Finance Suite</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#0f1117;color:#e8e8f0;margin:0;min-height:100vh}
+.wrap{max-width:1050px;margin:70px auto;padding:24px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
+h1{font-size:42px;margin:0}
+.lang-btn{padding:8px 12px;border:1px solid #2e3350;border-radius:6px;background:#1a1d2e;color:#e8e8f0;font-weight:700;cursor:pointer}
+.lang-btn:hover{border-color:#2563eb;background:#222640}
+.sub{color:#a0a0b8;margin-bottom:34px;line-height:1.6}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.card{background:#222640;border:1px solid #2e3350;border-radius:12px;padding:24px}
+.card h2{margin-top:0}.card p{color:#a0a0b8;min-height:58px;line-height:1.55}
+.btn{display:inline-block;padding:11px 16px;border-radius:8px;background:#2563eb!important;border:1px solid #2563eb!important;color:#fff!important;text-decoration:none;font-weight:700;box-shadow:none}
+.btn:hover{background:#1d4ed8!important;border-color:#1d4ed8!important}
+.status{margin-top:30px;padding:16px;background:#1a1d2e;border:1px solid #2e3350;border-radius:10px;color:#a0a0b8}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#34d399;margin-inline-end:7px}
+.lang-ar{display:none}html[dir="rtl"] body{text-align:right}html[dir="rtl"] .lang-en{display:none}html[dir="rtl"] .lang-ar{display:inline}
+button:focus-visible,a:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+@media(max-width:650px){.wrap{margin:30px auto;padding:18px}.top{align-items:flex-start}h1{font-size:32px}.card p{min-height:auto}}
+
+/* FINAL BLUE OVERRIDE: project launch buttons must never render white/purple */
+a.btn, a.btn:link, a.btn:visited {
+  background:#2563eb !important;
+  border-color:#2563eb !important;
+  color:#ffffff !important;
+}
+a.btn:hover, a.btn:focus {
+  background:#1d4ed8 !important;
+  border-color:#1d4ed8 !important;
+  color:#ffffff !important;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Raed Finance Suite</h1>
+    <button id="lang" class="lang-btn" type="button">العربية</button>
+  </div>
+  <div class="sub">
+    <span class="lang-en">One local workspace for your finance and market-analysis projects.</span>
+    <span class="lang-ar">مساحة محلية واحدة لمشاريعك المالية وتحليل الأسواق.</span>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <h2><span class="lang-en">Investment Calculator</span><span class="lang-ar">حاسبة الاستثمار</span></h2>
+      <p><span class="lang-en">Compound growth, scenarios, reverse goal calculation, and Excel export.</span><span class="lang-ar">النمو المركب والسيناريوهات وحساب الهدف العكسي وتصدير Excel.</span></p>
+      <a class="btn" href="http://127.0.0.1:5173" target="_blank"><span class="lang-en">Open</span><span class="lang-ar">فتح</span></a>
+    </div>
+    <div class="card">
+      <h2><span class="lang-en">Stock Comparison</span><span class="lang-ar">مقارنة الأسهم</span></h2>
+      <p><span class="lang-en">Compare US stocks using live Yahoo Finance data, price history, and fundamentals.</span><span class="lang-ar">قارن الأسهم الأمريكية باستخدام بيانات Yahoo Finance والسجل السعري والأساسيات.</span></p>
+      <a class="btn" href="http://127.0.0.1:5174" target="_blank"><span class="lang-en">Open</span><span class="lang-ar">فتح</span></a>
+    </div>
+    <div class="card">
+      <h2><span class="lang-en">ETF Analysis</span><span class="lang-ar">تحليل ETF</span></h2>
+      <p><span class="lang-en">ETF metrics, holdings, risk, performance, watchlists, and market data.</span><span class="lang-ar">مؤشرات ETF والمكونات والمخاطر والأداء وقوائم المتابعة وبيانات السوق.</span></p>
+      <a class="btn" href="http://127.0.0.1:8000" target="_blank"><span class="lang-en">Open</span><span class="lang-ar">فتح</span></a>
+    </div>
+  </div>
+  <div class="status"><span class="dot"></span><span class="lang-en">Launcher is running. Keep the terminal window open while using the suite.</span><span class="lang-ar">المشغّل يعمل. اترك نافذة الأوامر مفتوحة أثناء استخدام المواقع.</span></div>
+</div>
+<script>
+const b=document.getElementById('lang');
+let l='en';
+function applyLang(){document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';b.textContent=l==='en'?'العربية':'English'}
+b.addEventListener('click',()=>{l=l==='en'?'ar':'en';applyLang()});
+applyLang();
+</script>
+</body>
+</html>

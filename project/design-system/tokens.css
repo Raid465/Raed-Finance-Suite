@@ -1,0 +1,24 @@
+:root {
+  --etf-bg: #0f1117;
+  --etf-surface: #1a1d2e;
+  --etf-card: #222640;
+  --etf-input: #2a2e4a;
+  --etf-border: #2e3350;
+  --etf-text: #e8e8f0;
+  --etf-text-muted: #a0a0b8;
+  --etf-primary: #2563eb;
+  --etf-primary-hover: #1d4ed8;
+  --etf-success: #34d399;
+  --etf-danger: #f87171;
+  --etf-warning: #fbbf24;
+  --etf-accent-2: #fb923c;
+  --etf-radius-sm: 6px;
+  --etf-radius-md: 8px;
+  --etf-radius-lg: 12px;
+  --etf-space-1: 4px;
+  --etf-space-2: 8px;
+  --etf-space-3: 12px;
+  --etf-space-4: 16px;
+  --etf-space-5: 24px;
+  --etf-space-6: 32px;
+}
