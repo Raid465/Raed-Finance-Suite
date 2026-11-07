@@ -9,6 +9,7 @@ venv/
 .env.*
 !.env.example
 *.log
+project/logs/
 *.db
 .DS_Store
 Thumbs.db

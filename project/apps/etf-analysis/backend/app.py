@@ -75,22 +75,25 @@ def _valid_json(path: Path, expected_key: str):
 
 
 def _legacy_candidates(filename: str):
-    """Find an older extracted suite copy only for one-time migration."""
+    """Find an older extracted suite copy only for one-time migration.
+
+    Only folders named Raed-Finance-Suite* next to this copy are checked, in
+    the old layout (<suite>/apps/...) and the current one (<suite>/project/apps/...).
+    Unrelated folders (e.g. the whole Downloads folder) are never scanned.
+    """
     current = (BUNDLED_DATA_DIR / filename).resolve()
     seen = set()
     candidates = []
 
-    # Sibling extracted suite folders are the common upgrade path.
-    suite_root = BUNDLED_DATA_DIR.parents[2]  # .../Raed-Finance-Suite-*/
-    parent = suite_root.parent
-    for pattern_root in (parent, Path.home() / "Downloads"):
+    # backend -> etf-analysis -> apps -> <suite or project> -> <suite>
+    roots = {BUNDLED_DATA_DIR.parents[2].parent, BUNDLED_DATA_DIR.parents[3].parent}
+    for pattern_root in roots:
         if not pattern_root.exists():
             continue
         try:
             patterns = (
                 f"Raed-Finance-Suite*/apps/etf-analysis/backend/{filename}",
-                f"*/apps/etf-analysis/backend/{filename}",
-                f"*/*/apps/etf-analysis/backend/{filename}",
+                f"Raed-Finance-Suite*/project/apps/etf-analysis/backend/{filename}",
             )
             for pattern in patterns:
                 for path in pattern_root.glob(pattern):

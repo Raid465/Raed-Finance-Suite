@@ -52,8 +52,10 @@ for pair in [
     "['نمو و الدخل','Growth & Income']",
 ]:
     check(f'ETF translation exists: {pair}', pair in E)
-check('Mutual fund names are excluded from generic translation', 'data-no-translate>${f.name}</' in E)
-check('Fund managers are excluded from generic translation', 'data-no-translate>${f.fundManager}</' in E)
+check('Mutual fund names are excluded from generic translation', 'data-no-translate>${esc(f.name)}</' in E)
+check('Fund managers are excluded from generic translation', 'data-no-translate>${esc(f.fundManager)}</' in E)
+check('ETF page escapes external text before innerHTML', 'function esc(' in E and '${esc(n.title)}' in E and '${esc(h.name)}' in E)
+check('ETF news links only open http(s) URLs', 'function safeUrl(' in E and "onclick=\"window.open('${n.url}'" not in E)
 check('Translation walker skips protected proper names', '[data-no-translate]' in E and "closest('.lang-toggle,script,style,[data-no-translate]')" in E)
 fn_names=re.findall(r'\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(', E)
 dups=sorted({n for n in fn_names if fn_names.count(n)>1})

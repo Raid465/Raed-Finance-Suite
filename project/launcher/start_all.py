@@ -46,39 +46,67 @@ def _windows_image_name(pid):
     except Exception:
         return ''
 
-def stop_old_suite_servers():
-    """Free this suite's fixed local ports before starting the new copy.
+# PIDs of the processes this launcher started, so the next run can stop only
+# those and never touches other projects that happen to use the same ports.
+PID_FILE = LOGS / 'suite_pids.json'
+OWN_IMAGES = {'cmd.exe', 'node.exe', 'py.exe', 'python.exe', 'pythonw.exe'}
 
-    This fixes a subtle Windows issue where an older extracted copy can remain
-    alive on localhost and the browser then shows its stale CSS/UI.
+def save_owned_pids():
+    try:
+        PID_FILE.write_text(json.dumps({'pids': [os.getpid(), *(p.pid for p in processes)]}), encoding='utf-8')
+    except OSError:
+        pass
+
+def clear_owned_pids():
+    try:
+        PID_FILE.unlink()
+    except OSError:
+        pass
+
+def _load_owned_pids():
+    try:
+        data = json.loads(PID_FILE.read_text(encoding='utf-8'))
+        return [int(p) for p in data.get('pids', []) if int(p) != os.getpid()]
+    except Exception:
+        return []
+
+def stop_old_suite_servers():
+    """Stop servers left over from a previous run of THIS launcher.
+
+    Only PIDs recorded in logs/suite_pids.json are stopped. Anything else
+    listening on the suite's ports is reported, not killed, because it may be
+    a different project (5173, 3001 and 8000 are common dev-server ports).
     """
     if os.name != 'nt':
         return
+    owned = _load_owned_pids()
+    stopped = False
+    for pid in owned:
+        image = _windows_image_name(pid)
+        if image not in OWN_IMAGES:
+            continue  # already gone, or the PID now belongs to an unrelated program
+        if not stopped:
+            print('\nStopping servers from the previous Raed Finance Suite run...')
+            stopped = True
+        print(f'  stopping PID {pid} ({image})')
+        subprocess.run(['taskkill','/PID',str(pid),'/T','/F'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
+    clear_owned_pids()
+    if stopped:
+        time.sleep(1.2)
+
     listeners = _windows_listeners()
-    victims = set()
     blocked = []
     for port in EXPECTED_PORTS:
-        for pid in listeners.get(port,set()):
-            if pid == os.getpid():
-                continue
-            image = _windows_image_name(pid)
-            if image.startswith('python') or image == 'node.exe' or image == 'py.exe':
-                victims.add((pid,image,port))
-            else:
-                blocked.append((port,pid,image or 'unknown process'))
+        for pid in listeners.get(port, set()):
+            if pid != os.getpid():
+                blocked.append((port, pid, _windows_image_name(pid) or 'unknown process'))
     if blocked:
-        details = ', '.join(f'port {port} -> PID {pid} ({image})' for port,pid,image in blocked)
-        raise RuntimeError('A required Raed Finance Suite port is already in use by another program: '+details+'. Close that program and run Start Raed Finance.bat again.')
-    if victims:
-        print('\nStopping old Raed Finance Suite local servers...')
-        killed=set()
-        for pid,image,port in sorted(victims):
-            if pid in killed:
-                continue
-            print(f'  stopping PID {pid} ({image}) using port {port}')
-            subprocess.run(['taskkill','/PID',str(pid),'/T','/F'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
-            killed.add(pid)
-        time.sleep(1.2)
+        details = ', '.join(f'port {port} -> PID {pid} ({image})' for port, pid, image in blocked)
+        raise RuntimeError(
+            'A required Raed Finance Suite port is already in use: ' + details + '. '
+            'This may be another project or an older copy of the suite. '
+            'Close that window/program and run Start Raed Finance.bat again.'
+        )
 
 def _port_open(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -166,6 +194,7 @@ def cleanup(*_):
     for f in log_handles:
         try: f.close()
         except Exception: pass
+    clear_owned_pids()
     raise SystemExit(0)
 
 def main():
@@ -179,6 +208,7 @@ def main():
     for service in SERVICES:
         start_service(service)
         print(f"Started: {service['name']}")
+    save_owned_pids()
     httpd=ThreadingHTTPServer(('127.0.0.1',5050),Handler)
     threading.Thread(target=httpd.serve_forever,daemon=True).start()
     print('\nChecking services:')

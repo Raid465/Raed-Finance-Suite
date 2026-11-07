@@ -321,6 +321,12 @@ const COLORS=['#4f8cff','#34d399','#4f8cff','#fb923c','#f87171','#fbbf24','#38bd
 function isArabicUI(){return document.documentElement.lang==='ar'}
 function ui(ar,en){return isArabicUI()?ar:en}
 function uiLocale(){return isArabicUI()?'ar-SA':'en-US'}
+// Escape text from APIs/user input before it goes into innerHTML.
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+// Quote a value as a JS string literal that is safe inside an onclick="..." attribute.
+function q(v){return esc(JSON.stringify(String(v??'')))}
+// Allow only http(s) links from news feeds.
+function safeUrl(u){try{const x=new URL(String(u||''),location.href);return(x.protocol==='https:'||x.protocol==='http:')?x.href:''}catch(e){return''}}
 
 function tab(t){document.querySelectorAll('.tb').forEach((b,i)=>{b.classList.toggle('on',['analyze','compare','multi','movers','saudi','funds','tools'][i]===t)});document.querySelectorAll('.pn').forEach(p=>p.classList.remove('on'));document.getElementById('pn-'+t).classList.add('on');hideErr();if(t==='movers')loadMovers();if(t==='saudi')loadSaudiList();if(t==='funds')searchFunds();if(t==='tools')loadWatchlist()}
 function subtab(t){document.querySelectorAll('.sub-tab').forEach((b,i)=>{b.classList.toggle('on',['watchlist','portfolio','alerts'][i]===t)});document.querySelectorAll('.sub-pn').forEach(p=>p.classList.remove('on'));document.getElementById('sub-'+t).classList.add('on');if(t==='watchlist')loadWatchlist();if(t==='portfolio'){pfLoad();renderPfItems()}if(t==='alerts')loadAlerts()}
@@ -406,7 +412,7 @@ function renderAnalysis(data,hist,container){
     // Price + Pre/Post
     html+=`<div class="cd">
         <div class="ph"><div>
-            <h2 style="margin-bottom:6px">${info.name} (${info.symbol})</h2>
+            <h2 style="margin-bottom:6px">${esc(info.name)} (${esc(info.symbol)})</h2>
             <div class="pd">
                 <span class="pp">${fmtPr(m.current_price)}</span>
                 <span class="pc ${pC(m.day_change)}">${pS(m.day_change)}${fmtPr(m.day_change)} (${pS(m.day_change_pct)}${m.day_change_pct?.toFixed(2)||'-'})</span>
@@ -414,12 +420,12 @@ function renderAnalysis(data,hist,container){
             ${pp.pre_market_price?`<div style="margin-top:6px;font-size:.85rem;color:var(--txt2)">Pre-Market: <b>${fmtPr(pp.pre_market_price)}</b> <span class="${pC(pp.pre_market_change)}">${pS(pp.pre_market_change)}${fmtP(pp.pre_market_change_pct)}</span></div>`:''}
         </div>
         <div class="pb">
-            <button class="btn btn-sm btn-out" onclick="chgP('${info.symbol}','1mo',this)">1M</button>
-            <button class="btn btn-sm btn-out" onclick="chgP('${info.symbol}','3mo',this)">3M</button>
-            <button class="btn btn-sm btn-out" onclick="chgP('${info.symbol}','6mo',this)">6M</button>
-            <button class="btn btn-sm btn-out on" onclick="chgP('${info.symbol}','1y',this)">1Y</button>
-            <button class="btn btn-sm btn-out" onclick="chgP('${info.symbol}','2y',this)">2Y</button>
-            <button class="btn btn-sm btn-out" onclick="chgP('${info.symbol}','5y',this)">5Y</button>
+            <button class="btn btn-sm btn-out" onclick="chgP(${q(info.symbol)},'1mo',this)">1M</button>
+            <button class="btn btn-sm btn-out" onclick="chgP(${q(info.symbol)},'3mo',this)">3M</button>
+            <button class="btn btn-sm btn-out" onclick="chgP(${q(info.symbol)},'6mo',this)">6M</button>
+            <button class="btn btn-sm btn-out on" onclick="chgP(${q(info.symbol)},'1y',this)">1Y</button>
+            <button class="btn btn-sm btn-out" onclick="chgP(${q(info.symbol)},'2y',this)">2Y</button>
+            <button class="btn btn-sm btn-out" onclick="chgP(${q(info.symbol)},'5y',this)">5Y</button>
         </div></div>
         <div style="max-height:380px;position:relative">${h.length?'':'<div id="price-loading" class="ld" style="position:absolute;inset:0;z-index:2"><div class="sp"></div><br>جاري تحميل الرسم...</div>'}<canvas id="ch-price"></canvas></div>
     </div>`;
@@ -444,12 +450,12 @@ function renderAnalysis(data,hist,container){
 
     // Fund Info + Description
     html+=`<div class="cd"><h2>معلومات الصندوق</h2><div class="ig">
-        <div class="ii"><div class="l">الشركة</div><div class="v">${info.provider||'-'}</div></div>
-        <div class="ii"><div class="l">الفئة</div><div class="v">${info.category||'-'}</div></div>
+        <div class="ii"><div class="l">الشركة</div><div class="v">${esc(info.provider||'-')}</div></div>
+        <div class="ii"><div class="l">الفئة</div><div class="v">${esc(info.category||'-')}</div></div>
         <div class="ii"><div class="l">الأصول</div><div class="v">${fmtN(info.aum)}</div></div>
         <div class="ii"><div class="l">التأسيس</div><div class="v">${fmtD(info.inception_date)}</div></div>
     </div>
-    ${desc?.description?`<h3 style="margin-top:14px">وصف الصندوق</h3><p class="desc-text">${desc.description}</p>`:''}
+    ${desc?.description?`<h3 style="margin-top:14px">وصف الصندوق</h3><p class="desc-text">${esc(desc.description)}</p>`:''}
     </div>`;
 
     // Slower composition data is filled asynchronously so it never blocks the
@@ -460,7 +466,7 @@ function renderAnalysis(data,hist,container){
     if(holdings.length){
         html+=`<div class="cd"><h2>أعلى ${holdings.length} مراكز</h2>
         <table><thead><tr><th>#</th><th>الرمز</th><th>الاسم</th><th>النسبة</th></tr></thead><tbody>`;
-        holdings.forEach((h,i)=>{html+=`<tr><td>${i+1}</td><td style="direction:ltr;text-align:left;font-weight:700;color:var(--blue)">${h.symbol}</td><td>${h.name}</td><td>${h.weight.toFixed(2)}%</td></tr>`});
+        holdings.forEach((h,i)=>{html+=`<tr><td>${i+1}</td><td style="direction:ltr;text-align:left;font-weight:700;color:var(--blue)">${esc(h.symbol)}</td><td>${esc(h.name)}</td><td>${h.weight.toFixed(2)}%</td></tr>`});
         html+='</tbody></table></div>';
         const ch=Math.max(280,holdings.length*26);
         html+=`<div class="cd"><h2>توزيع المراكز</h2><div class="cc"><canvas id="ch-hold"></canvas></div></div>`;
@@ -480,9 +486,9 @@ function renderAnalysis(data,hist,container){
     html+=`<div class="cd" id="tech-section">
         <h2>المؤشرات الفنية</h2>
         <div class="pb" style="margin-bottom:14px">
-            <button class="btn btn-sm btn-out" onclick="loadTech('${info.symbol}','6mo',this)">6M</button>
-            <button class="btn btn-sm btn-out on" onclick="loadTech('${info.symbol}','1y',this)">1Y</button>
-            <button class="btn btn-sm btn-out" onclick="loadTech('${info.symbol}','2y',this)">2Y</button>
+            <button class="btn btn-sm btn-out" onclick="loadTech(${q(info.symbol)},'6mo',this)">6M</button>
+            <button class="btn btn-sm btn-out on" onclick="loadTech(${q(info.symbol)},'1y',this)">1Y</button>
+            <button class="btn btn-sm btn-out" onclick="loadTech(${q(info.symbol)},'2y',this)">2Y</button>
         </div>
         <div id="tech-content"><div class="ld"><div class="sp"></div></div></div>
     </div>`;
@@ -498,7 +504,7 @@ function renderAnalysis(data,hist,container){
 
     // Action buttons
     html+=`<div class="cd" style="text-align:center">
-        <button class="btn btn-green" onclick="addToWatchlistDirect('${info.symbol}')">إضافة للمتابعة</button>
+        <button class="btn btn-green" onclick="addToWatchlistDirect(${q(info.symbol)})">إضافة للمتابعة</button>
         <button class="btn btn-orange" style="margin-right:8px" onclick="window.print()">طباعة التقرير</button>
     </div>`;
 
@@ -568,7 +574,7 @@ function renderComposition(comp){
     let html='';
     if(holdings.length){
         html+=`<div class="cd"><h2>أعلى ${holdings.length} مراكز</h2><table><thead><tr><th>#</th><th>الرمز</th><th>الاسم</th><th>النسبة</th></tr></thead><tbody>`;
-        holdings.forEach((h,i)=>{html+=`<tr><td>${i+1}</td><td style="direction:ltr;text-align:left;font-weight:700;color:var(--blue)">${h.symbol}</td><td>${h.name}</td><td>${Number(h.weight||0).toFixed(2)}%</td></tr>`});
+        holdings.forEach((h,i)=>{html+=`<tr><td>${i+1}</td><td style="direction:ltr;text-align:left;font-weight:700;color:var(--blue)">${esc(h.symbol)}</td><td>${esc(h.name)}</td><td>${Number(h.weight||0).toFixed(2)}%</td></tr>`});
         html+='</tbody></table></div><div class="cd"><h2>توزيع المراكز</h2><div class="cc"><canvas id="ch-hold-lazy"></canvas></div></div>';
     }
     if(hasS||hasA){
@@ -688,7 +694,7 @@ async function loadDiv(sym){
         <div class="div-card"><div class="l">عدد التوزيعات</div><div class="v">${divs.length}</div></div>
     </div>`;
     html+='<div style="max-height:300px;overflow-y:auto"><table><thead><tr><th>التاريخ</th><th>المبلغ</th></tr></thead><tbody>';
-    divs.slice(0,20).forEach(d=>{html+=`<tr><td>${d.date}</td><td>$${d.amount.toFixed(4)}</td></tr>`});
+    divs.slice(0,20).forEach(d=>{html+=`<tr><td>${esc(d.date)}</td><td>$${d.amount.toFixed(4)}</td></tr>`});
     html+='</tbody></table></div>';
     el.innerHTML=html;
 }
@@ -702,10 +708,10 @@ async function loadNews(sym){
     if(!news.length){el.innerHTML='<p>لا توجد أخبار حالياً</p>';return}
     let html='';
     news.forEach(n=>{
-        html+=`<div class="news-item" ${n.url?`onclick="window.open('${n.url}','_blank')" style="cursor:pointer"`:''}>
-            <div class="news-title">${n.title}</div>
-            <div class="news-meta">${n.publisher} ${n.published?'• '+new Date(n.published).toLocaleDateString('ar-SA'):''}</div>
-            ${n.summary?`<div class="news-summary">${n.summary.substring(0,200)}${n.summary.length>200?'...':''}</div>`:''}
+        html+=`<div class="news-item" ${safeUrl(n.url)?`onclick="window.open(${q(safeUrl(n.url))},'_blank','noopener')" style="cursor:pointer"`:''}>
+            <div class="news-title">${esc(n.title)}</div>
+            <div class="news-meta">${esc(n.publisher)} ${n.published?'• '+new Date(n.published).toLocaleDateString('ar-SA'):''}</div>
+            ${n.summary?`<div class="news-summary">${esc(n.summary.substring(0,200))}${n.summary.length>200?'...':''}</div>`:''}
         </div>`;
     });
     el.innerHTML=html;
@@ -781,14 +787,14 @@ function renderCompare(data,container){
         const rA=a.risk||{};const rB=b.risk||{};
         let bc='ol';if(ov.overlap_percentage>=50)bc='oh';else if(ov.overlap_percentage>=20)bc='om';
         let html=`<div class="cd" style="text-align:center">
-            <h2>التداخل: ${a.info?.symbol||'A'} vs ${b.info?.symbol||'B'}</h2>
+            <h2>التداخل: ${esc(a.info?.symbol||'A')} vs ${esc(b.info?.symbol||'B')}</h2>
             <div class="ob ${bc}">${(ov.overlap_percentage||0).toFixed(1)}%</div>
             <p class="interp">${ov.interpretation||''}</p>
             <p style="color:var(--txt2);margin-top:6px;font-size:.85rem">${ov.shared_count||0} أسهم مشتركة من ${ov.holdings_count_a||0}+${ov.holdings_count_b||0}</p>
         </div>`;
 
         function cm(l,va,vb,f=v=>v){return`<div class="cmc"><div class="l">${l}</div><div class="vals"><span class="va">${f(va)}</span><span class="vs">𝕏</span><span class="vb">${f(vb)}</span></div></div>`}
-        html+=`<div class="cd"><h2>مقارنة المؤشرات</h2><div class="lr"><div class="li"><span class="da"></span>${a.info?.symbol||'A'}</div><div class="li"><span class="db"></span>${b.info?.symbol||'B'}</div></div>
+        html+=`<div class="cd"><h2>مقارنة المؤشرات</h2><div class="lr"><div class="li"><span class="da"></span>${esc(a.info?.symbol||'A')}</div><div class="li"><span class="db"></span>${esc(b.info?.symbol||'B')}</div></div>
         <div class="cmr" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
             ${cm('السعر',mA.current_price,mB.current_price,fmtPr)}${cm('P/E',mA.trailing_pe,mB.trailing_pe)}${cm('P/B',mA.price_to_book,mB.price_to_book)}
             ${cm('المصاريف',mA.expense_ratio,mB.expense_ratio,fmtP)}${cm('التوزيعات',mA.dividend_yield,mB.dividend_yield,fmtP)}
@@ -799,8 +805,8 @@ function renderCompare(data,container){
 
         const shared=ov.shared_holdings||[];
         if(shared.length){
-            html+=`<div class="cd"><h2>الأسهم المشتركة</h2><table><thead><tr><th>#</th><th>الرمز</th><th>الاسم</th><th class="ca">${a.info?.symbol||'A'}</th><th class="cb">${b.info?.symbol||'B'}</th><th>المساهمة</th></tr></thead><tbody>`;
-            shared.forEach((h,i)=>{html+=`<tr><td>${i+1}</td><td style="direction:ltr;text-align:left;font-weight:700;color:var(--blue)">${h.symbol||''}</td><td>${h.name||''}</td><td>${(h.weight_a||0).toFixed(2)}%</td><td>${(h.weight_b||0).toFixed(2)}%</td><td style="font-weight:700">${(h.contribution||0).toFixed(2)}%</td></tr>`});
+            html+=`<div class="cd"><h2>الأسهم المشتركة</h2><table><thead><tr><th>#</th><th>الرمز</th><th>الاسم</th><th class="ca">${esc(a.info?.symbol||'A')}</th><th class="cb">${esc(b.info?.symbol||'B')}</th><th>المساهمة</th></tr></thead><tbody>`;
+            shared.forEach((h,i)=>{html+=`<tr><td>${i+1}</td><td style="direction:ltr;text-align:left;font-weight:700;color:var(--blue)">${esc(h.symbol||'')}</td><td>${esc(h.name||'')}</td><td>${(h.weight_a||0).toFixed(2)}%</td><td>${(h.weight_b||0).toFixed(2)}%</td><td style="font-weight:700">${(h.contribution||0).toFixed(2)}%</td></tr>`});
             html+='</tbody></table></div>';
             html+=`<div class="cd"><h2>مخطط مقارن</h2><div style="max-height:400px"><canvas id="ch-ov"></canvas></div></div>`;
         }else{html+=`<div class="cd"><div class="es"><div class="ic">⚠</div><p>لا توجد أسهم مشتركة — تداخل 0%</p></div></div>`}
@@ -912,14 +918,14 @@ async function loadMovers(){
         const d=await r.json();
         let html='<div class="mv-row">';
         html+=`<div class="mv-col cd"><h2 style="color:var(--green)">Top Gainers</h2>`;
-        d.gainers.forEach(g=>{html+=`<div class="mv-item" onclick="document.getElementById('inp').value='${g.symbol}';tab('analyze');analyze()">
-            <div><div class="mv-sym">${g.symbol}</div><div class="mv-name">${g.name}</div></div>
+        d.gainers.forEach(g=>{html+=`<div class="mv-item" onclick="document.getElementById('inp').value=${q(g.symbol)};tab('analyze');analyze()">
+            <div><div class="mv-sym">${esc(g.symbol)}</div><div class="mv-name">${esc(g.name)}</div></div>
             <div style="text-align:left"><div style="font-weight:700">${fmtPr(g.price)}</div><div class="pos">+${g.change_pct.toFixed(2)}%</div></div>
         </div>`});
         html+='</div>';
         html+=`<div class="mv-col cd"><h2 style="color:var(--red)">Top Losers</h2>`;
-        d.losers.forEach(g=>{html+=`<div class="mv-item" onclick="document.getElementById('inp').value='${g.symbol}';tab('analyze');analyze()">
-            <div><div class="mv-sym">${g.symbol}</div><div class="mv-name">${g.name}</div></div>
+        d.losers.forEach(g=>{html+=`<div class="mv-item" onclick="document.getElementById('inp').value=${q(g.symbol)};tab('analyze');analyze()">
+            <div><div class="mv-sym">${esc(g.symbol)}</div><div class="mv-name">${esc(g.name)}</div></div>
             <div style="text-align:left"><div style="font-weight:700">${fmtPr(g.price)}</div><div class="neg">${g.change_pct.toFixed(2)}%</div></div>
         </div>`});
         html+='</div></div>';
@@ -955,14 +961,14 @@ async function loadWatchlist(){
             const r2=await fetch(`/api/quote/${sym}`);const d2=await r2.json();
             const m=d2.metrics||{};
             return `<div class="wl-item" style="flex-direction:row-reverse">
-                <div class="wl-actions"><button class="btn btn-sm btn-red" onclick="removeFromWatchlist('${sym}')">Delete</button></div>
+                <div class="wl-actions"><button class="btn btn-sm btn-red" onclick="removeFromWatchlist(${q(sym)})">Delete</button></div>
                 <div style="text-align:center;min-width:80px"><div style="font-weight:700">${fmtPr(m.current_price)}</div><div class="${pC(m.day_change)}">${pS(m.day_change)}${fmtP(m.day_change_pct)}</div></div>
-                <div onclick="document.getElementById('inp').value='${sym}';tab('analyze');analyze()" style="cursor:pointer;flex:1;text-align:right">
-                    <div style="font-weight:700;color:var(--blue);font-size:1.1rem">${sym}</div>
-                    <div style="font-size:.82rem;color:var(--txt2)">${d2.info?.name||sym}</div>
+                <div onclick="document.getElementById('inp').value=${q(sym)};tab('analyze');analyze()" style="cursor:pointer;flex:1;text-align:right">
+                    <div style="font-weight:700;color:var(--blue);font-size:1.1rem">${esc(sym)}</div>
+                    <div style="font-size:.82rem;color:var(--txt2)">${esc(d2.info?.name||sym)}</div>
                 </div>
             </div>`;
-        }catch(e){return `<div class="wl-item"><span>${sym}</span><button class="btn btn-sm btn-red" onclick="removeFromWatchlist('${sym}')">Delete</button></div>`}
+        }catch(e){return `<div class="wl-item"><span>${esc(sym)}</span><button class="btn btn-sm btn-red" onclick="removeFromWatchlist(${q(sym)})">Delete</button></div>`}
     }));
     el.innerHTML=rows.join('');
 }
@@ -1028,7 +1034,7 @@ function renderPfItems(){
     let html='<table><thead><tr><th>Symbol</th><th>Shares</th><th>Average Price</th><th></th></tr></thead><tbody>';
     pfItems.forEach((p,i)=>{
         html+=`<tr>
-            <td style="font-weight:700;color:var(--blue)">${p.symbol}</td>
+            <td style="font-weight:700;color:var(--blue)">${esc(p.symbol)}</td>
             <td>${p.shares}</td>
             <td>${p.avgPrice?fmtPr(p.avgPrice):'-'}</td>
             <td><button class="btn btn-sm btn-red" onclick="removePfItem(${i})">Delete</button></td>
@@ -1077,7 +1083,7 @@ async function calculatePfValue(){
                 const weight=totalValue>0?(x.value/totalValue*100):0;
                 const xPLClass=x.pl>=0?'pos':'neg';
                 html+=`<tr>
-                    <td style="font-weight:700;color:var(--blue)">${x.symbol}</td>
+                    <td style="font-weight:700;color:var(--blue)">${esc(x.symbol)}</td>
                     <td>${x.shares}</td>
                     <td>${fmtPr(x.avgPrice)}</td>
                     <td>${fmtPr(x.currentPrice)}</td>
@@ -1142,7 +1148,7 @@ function showNotification(title,body){
     if(el){
         const div=document.createElement('div');
         div.style.cssText='background:rgba(251,191,36,.15);border:1px solid var(--yellow);border-radius:8px;padding:12px;margin-bottom:8px;animation:pulse 1s';
-        div.innerHTML=`<b style="color:var(--yellow)">⚠ ${title}</b><br><span style="color:var(--txt2);font-size:.9rem">${body}</span>`;
+        div.innerHTML=`<b style="color:var(--yellow)">⚠ ${esc(title)}</b><br><span style="color:var(--txt2);font-size:.9rem">${esc(body)}</span>`;
         el.prepend(div);
         setTimeout(()=>div.remove(),30000);
     }
@@ -1156,7 +1162,7 @@ async function checkAlerts(){
         // Show triggered alerts
         if(d.triggered && d.triggered.length>0){
             for(const a of d.triggered){
-                const msg=`${a.symbol} ${ui('وصل إلى','reached')} ${fmtPr(a.current_price)} (${ui('الهدف','target')}: ${a.direction==='above'?ui('فوق','Above'):ui('تحت','Below')} ${fmtPr(a.target_price)})`;
+                const msg=`${a.symbol}${ui('وصل إلى','reached')} ${fmtPr(a.current_price)} (${ui('الهدف','target')}: ${a.direction==='above'?ui('فوق','Above'):ui('تحت','Below')} ${fmtPr(a.target_price)})`;
                 showNotification(ui('تنبيه سعر!','Price Alert!'),msg);
                 playAlertSound();
             }
@@ -1184,9 +1190,9 @@ async function loadAlerts(){
     d.alerts.forEach(a=>{
         const dirColor=a.direction==='above'?'var(--green)':'var(--red)';
         html+=`<div class="alert-item">
-            <span style="font-weight:700;color:var(--blue)">${a.symbol}</span>
+            <span style="font-weight:700;color:var(--blue)">${esc(a.symbol)}</span>
             <span style="color:${dirColor}">${a.direction==='above'?ui('فوق','Above'):ui('تحت','Below')} ${fmtPr(a.target_price)}</span>
-            <button class="btn btn-sm btn-red" onclick="removeAlert('${a.symbol}',${a.target_price})">Delete</button>
+            <button class="btn btn-sm btn-red" onclick="removeAlert(${q(a.symbol)},${Number(a.target_price)})">Delete</button>
         </div>`;
     });
     el.innerHTML=html;
@@ -1239,13 +1245,13 @@ async function loadSaudiList(){
                     const changeClass=info.day_change>=0?'pos':'neg';
                     const typeColor=etf.type==='REIT'?'var(--blue)':'var(--green)';
                     html+=`<tr>
-                        <td style="font-weight:700;color:var(--blue);direction:ltr">${etf.symbol}</td>
-                        <td><span style="color:${typeColor};font-weight:600;font-size:.82rem">${etf.type||'ETF'}</span></td>
-                        <td>${isArabicUI()?(etf.name_ar||etf.name):(etf.name||etf.name_ar)}</td>
-                        <td>${etf.category}</td>
+                        <td style="font-weight:700;color:var(--blue);direction:ltr">${esc(etf.symbol)}</td>
+                        <td><span style="color:${typeColor};font-weight:600;font-size:.82rem">${esc(etf.type||'ETF')}</span></td>
+                        <td>${esc(isArabicUI()?(etf.name_ar||etf.name):(etf.name||etf.name_ar))}</td>
+                        <td>${esc(etf.category)}</td>
                         <td>${info.current_price?.toFixed(2)||'-'} ر.س</td>
                         <td class="${changeClass}">${info.day_change>=0?'+':''}${info.day_change?.toFixed(2)||'0'} (${info.day_change_pct>=0?'+':''}${info.day_change_pct?.toFixed(2)||'0'}%)</td>
-                        <td><button class="btn btn-sm btn-out" onclick="document.getElementById('saudi-sym').value='${etf.symbol}';saudiSubtab('analyze');analyzeSaudi()">Analyze</button></td>
+                        <td><button class="btn btn-sm btn-out" onclick="document.getElementById('saudi-sym').value=${q(etf.symbol)};saudiSubtab('analyze');analyzeSaudi()">Analyze</button></td>
                     </tr>`;
                 }
             }catch(e){}
@@ -1290,7 +1296,7 @@ async function analyzeSaudi(){
         }catch(_){}
         const changeClass=info.day_change>=0?'pos':'neg';
         let html=`<div class="cd">
-            <h2>${isArabicUI()?(info.name_ar||info.name):(info.name||info.name_ar)} (${info.symbol})</h2>
+            <h2>${esc(isArabicUI()?(info.name_ar||info.name):(info.name||info.name_ar))} (${esc(info.symbol)})</h2>
             <div class="pd">
                 <span class="pp">${info.current_price?.toFixed(2)||'-'} ر.س</span>
                 <span class="pc ${changeClass}">${info.day_change>=0?'+':''}${info.day_change?.toFixed(2)||'0'} (${info.day_change_pct>=0?'+':''}${info.day_change_pct?.toFixed(2)||'0'}%)</span>
@@ -1299,9 +1305,9 @@ async function analyzeSaudi(){
 
         // Info cards
         html+=`<div class="cd"><h2>معلومات الصندوق</h2><div class="mg">
-            <div class="mc"><div class="l">الفئة</div><div class="v">${info.category||'-'}</div></div>
-            <div class="mc"><div class="l">المنصة</div><div class="v">${info.exchange||'-'}</div></div>
-            <div class="mc"><div class="l">العملة</div><div class="v">${info.currency||'-'}</div></div>
+            <div class="mc"><div class="l">الفئة</div><div class="v">${esc(info.category||'-')}</div></div>
+            <div class="mc"><div class="l">المنصة</div><div class="v">${esc(info.exchange||'-')}</div></div>
+            <div class="mc"><div class="l">العملة</div><div class="v">${esc(info.currency||'-')}</div></div>
             <div class="mc"><div class="l">أعلى 52 أسبوع</div><div class="v">${info.week52_high?.toFixed(2)||'-'}</div></div>
             <div class="mc"><div class="l">أدنى 52 أسبوع</div><div class="v">${info.week52_low?.toFixed(2)||'-'}</div></div>
             <div class="mc"><div class="l">متوسط 50 يوم</div><div class="v">${info.ma50?.toFixed(2)||'-'}</div></div>
@@ -1321,7 +1327,7 @@ async function analyzeSaudi(){
                 const barColor=colors[i%colors.length];
                 html+=`<tr>
                     <td style="color:var(--txt2)">${i+1}</td>
-                    <td style="font-weight:600">${h.name}</td>
+                    <td style="font-weight:600">${esc(h.name)}</td>
                     <td style="direction:ltr;text-align:right;font-weight:700;color:var(--blue)">${h.weight?.toFixed(1)||'-'}%</td>
                     <td style="width:40%"><div style="background:var(--bg2);border-radius:4px;height:20px;overflow:hidden">
                         <div style="background:${barColor};height:100%;width:${h.weight||0}%;transition:width .5s"></div>
@@ -1363,9 +1369,9 @@ async function analyzeSaudi(){
             divData.distributions.slice(0,12).forEach(dist=>{
                 const isRepeat=divData.distributions.filter(d=>Math.abs(d.amount-dist.amount)<0.001).length>1;
                 html+=`<tr>
-                    <td style="direction:ltr">${dist.date}</td>
+                    <td style="direction:ltr">${esc(dist.date)}</td>
                     <td style="font-weight:700;color:var(--green)">${dist.amount.toFixed(2)} ر.س</td>
-                    <td>${dist.type}${isRepeat?' <span style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:.75rem">مكرر</span>':''}</td>
+                    <td>${esc(dist.type)}${isRepeat?' <span style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:.75rem">مكرر</span>':''}</td>
                 </tr>`;
             });
             html+=`</tbody></table></div>`;
@@ -1382,10 +1388,10 @@ async function analyzeSaudi(){
         // Price chart
         html+=`<div class="cd"><h2>السعر</h2>
             <div class="pb" style="margin-bottom:14px">
-                <button class="btn btn-sm btn-out" onclick="loadSaudiChart('${sym}','1mo',this)">1M</button>
-                <button class="btn btn-sm btn-out" onclick="loadSaudiChart('${sym}','3mo',this)">3M</button>
-                <button class="btn btn-sm btn-out" onclick="loadSaudiChart('${sym}','6mo',this)">6M</button>
-                <button class="btn btn-sm btn-out on" onclick="loadSaudiChart('${sym}','1y',this)">1Y</button>
+                <button class="btn btn-sm btn-out" onclick="loadSaudiChart(${q(sym)},'1mo',this)">1M</button>
+                <button class="btn btn-sm btn-out" onclick="loadSaudiChart(${q(sym)},'3mo',this)">3M</button>
+                <button class="btn btn-sm btn-out" onclick="loadSaudiChart(${q(sym)},'6mo',this)">6M</button>
+                <button class="btn btn-sm btn-out on" onclick="loadSaudiChart(${q(sym)},'1y',this)">1Y</button>
             </div>
             <div style="max-height:380px"><canvas id="ch-saudi-price"></canvas></div>
         </div>`;
@@ -1428,10 +1434,10 @@ async function compareSaudi(){
         const rA=d.etf_a.risk||{},rB=d.etf_b.risk||{};
 
         let html=`<div class="cd">
-            <h2>مقارنة: ${isArabicUI()?(iA.name_ar||iA.name):(iA.name||iA.name_ar)} vs ${isArabicUI()?(iB.name_ar||iB.name):(iB.name||iB.name_ar)}</h2>
+            <h2>مقارنة: ${esc(isArabicUI()?(iA.name_ar||iA.name):(iA.name||iA.name_ar))} vs ${esc(isArabicUI()?(iB.name_ar||iB.name):(iB.name||iB.name_ar))}</h2>
             <div class="lr">
-                <div class="li"><span class="da"></span>${iA.symbol}</div>
-                <div class="li"><span class="db"></span>${iB.symbol}</div>
+                <div class="li"><span class="da"></span>${esc(iA.symbol)}</div>
+                <div class="li"><span class="db"></span>${esc(iB.symbol)}</div>
             </div>
         </div>`;
 
@@ -1532,15 +1538,15 @@ async function searchFunds(page=1){
             const ytdClass=ytd>=0?'pos':'neg';
             const nav=parseFloat(f.nav?.replace(/,/g,''))||0;
             html+=`<tr>
-                <td style="font-weight:700;color:var(--blue);direction:ltr">${f.symbol}</td>
-                <td style="max-width:250px" data-no-translate>${f.name}</td>
-                <td style="font-size:.82rem" data-no-translate>${f.fundManager}</td>
-                <td style="font-size:.82rem">${f.currency}</td>
+                <td style="font-weight:700;color:var(--blue);direction:ltr">${esc(f.symbol)}</td>
+                <td style="max-width:250px" data-no-translate>${esc(f.name)}</td>
+                <td style="font-size:.82rem" data-no-translate>${esc(f.fundManager)}</td>
+                <td style="font-size:.82rem">${esc(f.currency)}</td>
                 <td>${fmtV(nav)}</td>
                 <td>${f.unitPrice}</td>
                 <td class="${ytdClass}">${ytd>=0?'+':''}${f.ytdChange}%</td>
-                <td style="font-size:.82rem">${f.valuationDate}</td>
-                <td><button class="btn btn-sm btn-out" onclick="document.getElementById('funds-analyze-sym').value='${f.symbol}';fundsSubtab('analyze');analyzeFund()">Analyze</button></td>
+                <td style="font-size:.82rem">${esc(f.valuationDate)}</td>
+                <td><button class="btn btn-sm btn-out" onclick="document.getElementById('funds-analyze-sym').value=${q(f.symbol)};fundsSubtab('analyze');analyzeFund()">Analyze</button></td>
             </tr>`;
         });
         html+='</tbody></table>';
@@ -1605,7 +1611,7 @@ async function analyzeFund(){
         const isSharia=f.shariaCompliant.includes('موافق');
 
         let html=`<div class="cd">
-            <h2 data-no-translate>${f.name}</h2>
+            <h2 data-no-translate>${esc(f.name)}</h2>
             <div class="pd">
                 <span class="pp">${unitPrice.toFixed(4)} ${currencySymbol}</span>
                 <span class="pc ${ytdClass}">${ytdSign}${f.ytdChange}% من بداية العام</span>
@@ -1614,12 +1620,12 @@ async function analyzeFund(){
 
         // Fund Info Cards
         html+=`<div class="cd"><h2>معلومات الصندوق</h2><div class="mg">
-            <div class="mc"><div class="l">الرمز</div><div class="v" style="direction:ltr">${f.symbol}</div></div>
-            <div class="mc"><div class="l">مدير الصندوق</div><div class="v" data-no-translate>${f.fundManager}</div></div>
-            <div class="mc"><div class="l">العملة</div><div class="v">${f.currency}</div></div>
+            <div class="mc"><div class="l">الرمز</div><div class="v" style="direction:ltr">${esc(f.symbol)}</div></div>
+            <div class="mc"><div class="l">مدير الصندوق</div><div class="v" data-no-translate>${esc(f.fundManager)}</div></div>
+            <div class="mc"><div class="l">العملة</div><div class="v">${esc(f.currency)}</div></div>
             <div class="mc"><div class="l">التوافق الشرعي</div><div class="v" style="color:${isSharia?'var(--green)':'var(--red)'}">${f.shariaCompliant}</div></div>
-            <div class="mc"><div class="l">هدف الصندوق</div><div class="v">${f.objective}</div></div>
-            <div class="mc"><div class="l">تاريخ التقييم</div><div class="v">${f.valuationDate}</div></div>
+            <div class="mc"><div class="l">هدف الصندوق</div><div class="v">${esc(f.objective)}</div></div>
+            <div class="mc"><div class="l">تاريخ التقييم</div><div class="v">${esc(f.valuationDate)}</div></div>
         </div></div>`;
 
         // Financial Info
@@ -1643,10 +1649,10 @@ async function analyzeFund(){
 
         html+=`<div class="cd"><h2>تحليل الأصول والاستثمار</h2>`;
         html+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px">
-            <div class="mc" style="border-right:3px solid var(--blue)"><div class="l">الفئة الاستثمارية</div><div class="v" style="font-size:1.1rem">${f.objective}</div></div>
-            <div class="mc" style="border-right:3px solid var(--green)"><div class="l">العملة</div><div class="v" style="font-size:1.1rem">${f.currency}</div></div>
+            <div class="mc" style="border-right:3px solid var(--blue)"><div class="l">الفئة الاستثمارية</div><div class="v" style="font-size:1.1rem">${esc(f.objective)}</div></div>
+            <div class="mc" style="border-right:3px solid var(--green)"><div class="l">العملة</div><div class="v" style="font-size:1.1rem">${esc(f.currency)}</div></div>
             <div class="mc" style="border-right:3px solid ${isSharia?'var(--green)':'var(--red)'}"><div class="l">التوافق الشرعي</div><div class="v" style="font-size:1.1rem">${f.shariaCompliant}</div></div>
-            <div class="mc" style="border-right:3px solid var(--blue)"><div class="l">مدير الصندوق</div><div class="v" style="font-size:1rem" data-no-translate>${f.fundManager}</div></div>
+            <div class="mc" style="border-right:3px solid var(--blue)"><div class="l">مدير الصندوق</div><div class="v" style="font-size:1rem" data-no-translate>${esc(f.fundManager)}</div></div>
         </div>`;
 
         if(fundHoldings.length>0){
@@ -1659,7 +1665,7 @@ async function analyzeFund(){
                 const bc=fcolors[i%fcolors.length];
                 html+=`<tr>
                     <td style="color:var(--txt2)">${i+1}</td>
-                    <td style="font-weight:600">${h.name} <span style="color:var(--txt2);font-size:.8rem;direction:ltr;display:inline-block">${h.symbol}</span></td>
+                    <td style="font-weight:600">${esc(h.name)} <span style="color:var(--txt2);font-size:.8rem;direction:ltr;display:inline-block">${esc(h.symbol)}</span></td>
                     <td style="direction:ltr;text-align:right;font-weight:700;color:var(--blue)">${h.weight?.toFixed(1)}%</td>
                     <td style="width:40%"><div style="background:var(--bg2);border-radius:4px;height:20px;overflow:hidden">
                         <div style="background:${bc};height:100%;width:${h.weight}%;transition:width .5s"></div>
@@ -1702,9 +1708,9 @@ async function analyzeFund(){
             fundDivData.distributions.slice(0,12).forEach(dist=>{
                 const isRepeat=fundDivData.distributions.filter(d=>Math.abs(d.amount-dist.amount)<0.001).length>1;
                 html+=`<tr>
-                    <td style="direction:ltr">${dist.date}</td>
+                    <td style="direction:ltr">${esc(dist.date)}</td>
                     <td style="font-weight:700;color:var(--green)">${dist.amount.toFixed(4)} ${currencySymbol}</td>
-                    <td>${dist.type}${isRepeat?' <span style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:.75rem">مكرر</span>':''}</td>
+                    <td>${esc(dist.type)}${isRepeat?' <span style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:.75rem">مكرر</span>':''}</td>
                 </tr>`;
             });
             html+=`</tbody></table></div>`;
@@ -1760,7 +1766,7 @@ async function analyzeFund(){
                 <div style="font-size:3rem;font-weight:800;color:${ratingColor}">${rating}</div>
                 <div style="color:var(--txt2);margin-top:8px">${ratingDesc}</div>
                 <div style="margin-top:12px;display:flex;justify-content:center;gap:16px;flex-wrap:wrap">
-                    <div class="mc" style="min-width:120px"><div class="l">العملة</div><div class="v">${f.currency}</div></div>
+                    <div class="mc" style="min-width:120px"><div class="l">العملة</div><div class="v">${esc(f.currency)}</div></div>
                     <div class="mc" style="min-width:120px"><div class="l">شرعي</div><div class="v" style="color:${isSharia?'var(--green)':'var(--red)'}">${isSharia?'نعم':'لا'}</div></div>
                     <div class="mc" style="min-width:120px"><div class="l">الحجم</div><div class="v">${fmtV(nav)}</div></div>
                 </div>
@@ -1769,7 +1775,7 @@ async function analyzeFund(){
 
         // Add to watchlist button
         html+=`<div class="cd" style="text-align:center">
-            <button class="btn btn-green" onclick="addToWatchlistDirect('${f.symbol}')" style="padding:12px 32px;font-size:1rem">
+            <button class="btn btn-green" onclick="addToWatchlistDirect(${q(f.symbol)})" style="padding:12px 32px;font-size:1rem">
                 + إضافة إلى قائمة المتابعة
             </button>
         </div>`;
@@ -1801,14 +1807,14 @@ async function loadFundsStats(){
         // By currency
         html+='<h3 style="margin-top:16px">التوزيع حسب العملة</h3><div class="mg">';
         Object.entries(d.currencies).forEach(([k,v])=>{
-            html+=`<div class="mc"><div class="l">${k}</div><div class="v">${v} صندوق</div></div>`;
+            html+=`<div class="mc"><div class="l">${esc(k)}</div><div class="v">${v} صندوق</div></div>`;
         });
         html+='</div>';
 
         // By objective
         html+='<h3 style="margin-top:16px">التوزيع حسب الهدف</h3><div class="mg">';
         Object.entries(d.objectives).forEach(([k,v])=>{
-            html+=`<div class="mc"><div class="l">${k}</div><div class="v">${v} صندوق</div></div>`;
+            html+=`<div class="mc"><div class="l">${esc(k)}</div><div class="v">${v} صندوق</div></div>`;
         });
         html+='</div>';
 
@@ -1816,9 +1822,9 @@ async function loadFundsStats(){
         html+='<h3 style="margin-top:16px">أكبر 10 صناديق أصولاً</h3><table><thead><tr><th>الرمز</th><th>الاسم</th><th>العملة</th><th>صافي الأصول</th></tr></thead><tbody>';
         d.top_funds.forEach(f=>{
             html+=`<tr>
-                <td style="font-weight:700;color:var(--blue);direction:ltr">${f.symbol}</td>
-                <td data-no-translate>${f.name}</td>
-                <td style="font-size:.82rem">${f.currency}</td>
+                <td style="font-weight:700;color:var(--blue);direction:ltr">${esc(f.symbol)}</td>
+                <td data-no-translate>${esc(f.name)}</td>
+                <td style="font-size:.82rem">${esc(f.currency)}</td>
                 <td>${f.nav}</td>
             </tr>`;
         });
