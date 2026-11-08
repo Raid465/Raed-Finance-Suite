@@ -1,14 +1,15 @@
 // Colors used by the stock comparison UI and chart tooltips.
+// Clean Light theme - same tokens as project/design-system/tokens.css.
 
 export const C = {
-  s1: "#4f8cff", s2: "#fb923c", bg: "#0f1117",
-  card: "#222640", border: "#2e3350",
-  text: "#e8e8f0", muted: "#a0a0b8",
-  green: "#34d399", red: "#f87171",
+  s1: "#2563eb", s2: "#ea580c", bg: "#f6f7f9",
+  card: "#ffffff", border: "#e3e6eb",
+  text: "#1a1f2b", muted: "#5b6472",
+  green: "#15803d", red: "#dc2626",
 };
 
 export const tip = {
-  contentStyle: { background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, color: C.text, fontSize: 13 },
+  contentStyle: { background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, color: C.text, fontSize: 13, boxShadow: "0 4px 16px rgba(15,23,42,.08)" },
   itemStyle: { color: C.text },
   labelStyle: { color: C.muted },
 };

@@ -13,14 +13,14 @@ def check(name, cond, detail=''):
 # Dashboard
 D=(ROOT/'launcher/dashboard.html').read_text(encoding='utf-8')
 check('Dashboard defaults to English', '<html lang="en" dir="ltr">' in D and "let l='en'" in D)
-check('Dashboard keeps classic dark visual style', '#0f1117' in D and '#222640' in D)
+check('Dashboard uses the Clean Light palette', '--bg:#f6f7f9' in D and '--card:#ffffff' in D and '#0f1117' not in D)
 check('Dashboard has no glass/radial redesign', 'backdrop-filter' not in D and 'radial-gradient' not in D)
 check('Dashboard has Arabic toggle', 'id="lang"' in D and 'العربية' in D and 'English' in D)
 
 # Investment calculator
 I=(ROOT/'apps/investment-calculator/src/index.css').read_text(encoding='utf-8')
 IL=(ROOT/'apps/investment-calculator/src/uiLanguage.ts').read_text(encoding='utf-8')
-check('Investment uses classic ETF-style background', 'background: #0f1117' in I)
+check('Investment uses the Clean Light background', 'background: #f6f7f9' in I and '#0f1117' not in I)
 check('Investment has no glass/radial redesign', 'backdrop-filter' not in I and 'radial-gradient' not in I)
 check('Investment defaults to English', "let lang: 'en'|'ar' = 'en'" in IL)
 check('Investment has language control', 'global-lang-toggle' in I and "dataset.langToggle" in IL)
@@ -28,6 +28,7 @@ check('Investment has language control', 'global-lang-toggle' in I and "dataset.
 # Stock comparison
 S=(ROOT/'apps/stock-comparison-tool/src/index.css').read_text(encoding='utf-8')
 SC=stock_ui()
+check('Stock comparison uses the Clean Light palette', 'bg: "#f6f7f9"' in SC and 'card: "#ffffff"' in SC)
 check('Stock stylesheet uses the Tailwind 4 entry point', S.strip().startswith('@import "tailwindcss";'))
 check('Stock defaults to English', 'useState("en")' in SC)
 check('Stock includes English/Arabic language switch', 'setLang' in SC and ('English' in SC or 'العربية' in SC))
@@ -37,7 +38,7 @@ E=etf_page()
 check('ETF defaults to English/LTR', '<html lang="en" dir="ltr">' in E and "DEFAULT_LANGUAGE='en'" in E and "let lang=DEFAULT_LANGUAGE" in E)
 check('ETF product redesign overlay removed', 'product-redesign' not in E)
 check('ETF has no glass/radial redesign', 'backdrop-filter' not in E and 'radial-gradient' not in E)
-check('ETF retains classic card palette', '--bg:#0f1117' in E and '--card:#222640' in E)
+check('ETF uses the Clean Light palette', '--bg:#f6f7f9' in E and '--card:#ffffff' in E and '#0f1117' not in E)
 check('ETF has Arabic toggle', 'className=\'lang-toggle\'' in E and "?'العربية':'English'" in E)
 
 # Launcher / ports / Windows npm fix
@@ -66,7 +67,7 @@ check('ETF composition is deferred from first response', '/api/composition/{symb
 check('ETF browser cache avoids repeat local requests', "sessionStorage.getItem('etf-cache:'+key)" in E and 'clientCacheSet' in E)
 check('ETF language observer translates only new DOM nodes', 'm.addedNodes.forEach(n=>translateTree(n,pairs))' in E and 'AE_PAIRS' in E)
 check('ETF production runner disables reload watcher', 'reload=False' in ETF_RUN)
-check('Stock comparison toolbar is compact classic dark', 'max-w-5xl mx-auto rounded-xl px-4 py-4 border' in SC and 'linear-gradient(135deg, #3b82f6, #1d4ed8)' not in SC)
+check('Stock comparison toolbar stays compact', 'max-w-5xl mx-auto rounded-xl px-4 py-4 border' in SC and 'linear-gradient(135deg, #3b82f6, #1d4ed8)' not in SC)
 
 # ETF persistence and translation completeness regression checks
 ETF_INITIAL = E.split('<script>')[0]

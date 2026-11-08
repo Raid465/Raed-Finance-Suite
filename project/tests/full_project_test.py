@@ -50,7 +50,9 @@ def main():
         ok = False; print(f"[FAIL] Dashboard language: {e}")
     try:
         _, etf, _ = get("http://127.0.0.1:8000")
-        passed = '<html lang="en" dir="ltr">' in etf and "DEFAULT_LANGUAGE='en'" in etf and 'ETF Fund Analyzer' in etf
+        # The language script is served as a separate file since the page was split.
+        _, etf_lang, _ = get("http://127.0.0.1:8000/static/js/ui-language.js")
+        passed = '<html lang="en" dir="ltr">' in etf and "DEFAULT_LANGUAGE='en'" in etf_lang and 'ETF Fund Analyzer' in etf
         print(f"[{'PASS' if passed else 'FAIL'}] ETF defaults to English")
         ok &= passed
     except Exception as e:

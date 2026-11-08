@@ -213,7 +213,7 @@ function showNotification(title,body){
     const el=document.getElementById('al-triggered');
     if(el){
         const div=document.createElement('div');
-        div.style.cssText='background:rgba(251,191,36,.15);border:1px solid var(--yellow);border-radius:8px;padding:12px;margin-bottom:8px;animation:pulse 1s';
+        div.style.cssText='background:rgba(180,83,9,.15);border:1px solid var(--yellow);border-radius:8px;padding:12px;margin-bottom:8px;animation:pulse 1s';
         div.innerHTML=`<b style="color:var(--yellow)">⚠ ${esc(title)}</b><br><span style="color:var(--txt2);font-size:.9rem">${esc(body)}</span>`;
         el.prepend(div);
         setTimeout(()=>div.remove(),30000);

@@ -1,6 +1,6 @@
 // Shared helpers: formatting, escaping, tabs, chart and client cache.
 let charts={};
-const COLORS=['#4f8cff','#34d399','#4f8cff','#fb923c','#f87171','#fbbf24','#38bdf8','#e879f9','#2dd4bf','#f472b6','#818cf8','#a3e635'];
+const COLORS=['#2563eb','#15803d','#2563eb','#c2410c','#dc2626','#b45309','#38bdf8','#e879f9','#2dd4bf','#f472b6','#818cf8','#a3e635'];
 function isArabicUI(){return document.documentElement.lang==='ar'}
 function ui(ar,en){return isArabicUI()?ar:en}
 function uiLocale(){return isArabicUI()?'ar-SA':'en-US'}

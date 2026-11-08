@@ -23,8 +23,9 @@ A comprehensive ETF and mutual fund analysis tool with Arabic-language interface
 ## Quick Start
 
 ```
-pip install -r backend\requirements.txt
-python run.py
+python -m venv ..\..\.venv
+..\..\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+..\..\.venv\Scripts\python.exe run.py
 ```
 
 Open http://localhost:8000
@@ -42,7 +43,9 @@ Open http://localhost:8000
 │   ├── fund_dividends.json # Dividend distribution data
 │   └── requirements.txt
 ├── frontend/
-│   └── index.html          # Single-page Arabic UI
+│   ├── index.html          # Page markup (English default, Arabic toggle)
+│   ├── css/app.css         # Clean Light styles
+│   └── js/                 # core, analyze, compare, tools, saudi, funds, init, ui-language
 ├── run.py                  # Entry point
 ├── audit_test.py           # QA audit tests
 └── README.md

@@ -5,36 +5,26 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Raed Finance Suite</title>
 <style>
+/* Clean Light theme - same tokens as design-system/tokens.css */
+:root{--bg:#f6f7f9;--surface:#f1f3f6;--card:#ffffff;--border:#e3e6eb;--text:#1a1f2b;--muted:#5b6472;--primary:#2563eb;--primary-hover:#1d4ed8;--success:#15803d}
 *{box-sizing:border-box}
-body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#0f1117;color:#e8e8f0;margin:0;min-height:100vh}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;min-height:100vh}
 .wrap{max-width:1050px;margin:70px auto;padding:24px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
 h1{font-size:42px;margin:0}
-.lang-btn{padding:8px 12px;border:1px solid #2e3350;border-radius:6px;background:#1a1d2e;color:#e8e8f0;font-weight:700;cursor:pointer}
-.lang-btn:hover{border-color:#2563eb;background:#222640}
-.sub{color:#a0a0b8;margin-bottom:34px;line-height:1.6}
+.lang-btn{padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-weight:700;cursor:pointer}
+.lang-btn:hover{border-color:var(--primary)}
+.sub{color:var(--muted);margin-bottom:34px;line-height:1.6}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
-.card{background:#222640;border:1px solid #2e3350;border-radius:12px;padding:24px}
-.card h2{margin-top:0}.card p{color:#a0a0b8;min-height:58px;line-height:1.55}
-.btn{display:inline-block;padding:11px 16px;border-radius:8px;background:#2563eb!important;border:1px solid #2563eb!important;color:#fff!important;text-decoration:none;font-weight:700;box-shadow:none}
-.btn:hover{background:#1d4ed8!important;border-color:#1d4ed8!important}
-.status{margin-top:30px;padding:16px;background:#1a1d2e;border:1px solid #2e3350;border-radius:10px;color:#a0a0b8}
-.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#34d399;margin-inline-end:7px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.card h2{margin-top:0}.card p{color:var(--muted);min-height:58px;line-height:1.55}
+a.btn{display:inline-block;padding:11px 16px;border-radius:8px;background:var(--primary);border:1px solid var(--primary);color:#fff;text-decoration:none;font-weight:700}
+a.btn:hover,a.btn:focus{background:var(--primary-hover);border-color:var(--primary-hover);color:#fff}
+.status{margin-top:30px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--muted)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--success);margin-inline-end:7px}
 .lang-ar{display:none}html[dir="rtl"] body{text-align:right}html[dir="rtl"] .lang-en{display:none}html[dir="rtl"] .lang-ar{display:inline}
-button:focus-visible,a:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+button:focus-visible,a:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 @media(max-width:650px){.wrap{margin:30px auto;padding:18px}.top{align-items:flex-start}h1{font-size:32px}.card p{min-height:auto}}
-
-/* FINAL BLUE OVERRIDE: project launch buttons must never render white/purple */
-a.btn, a.btn:link, a.btn:visited {
-  background:#2563eb !important;
-  border-color:#2563eb !important;
-  color:#ffffff !important;
-}
-a.btn:hover, a.btn:focus {
-  background:#1d4ed8 !important;
-  border-color:#1d4ed8 !important;
-  color:#ffffff !important;
-}
 </style>
 </head>
 <body>

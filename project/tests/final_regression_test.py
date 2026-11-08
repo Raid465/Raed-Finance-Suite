@@ -43,7 +43,7 @@ check('No accidental CJK/corrupt characters remain', not cjk, ', '.join(cjk[:5])
 # Dashboard blue/English
 D=(ROOT/'launcher/dashboard.html').read_text(encoding='utf-8')
 check('Dashboard is English by default', '<html lang="en" dir="ltr">' in D and "let l='en'" in D)
-check('Dashboard Open buttons are forced blue', 'background:#2563eb!important' in D.replace(' ',''))
+check('Dashboard Open buttons are blue', '--primary:#2563eb' in D.replace(' ','') and 'a.btn{' in D.replace(' ','') and 'background:var(--primary)' in D.replace(' ',''))
 
 # ETF UI/localization/data preservation
 E=etf_page()

@@ -69,7 +69,7 @@ A comprehensive interactive tool for investment planning and compound interest c
 | **React 19** | Interactive UI |
 | **TypeScript** | Type-safe code |
 | **Vite** | Fast build and dev server |
-| **Tailwind CSS** | Dark mode styling |
+| **Tailwind CSS** | Clean Light styling |
 | **Recharts** | Interactive charts |
 | **ExcelJS** | Excel report export |
 | **file-saver** | File downloads |

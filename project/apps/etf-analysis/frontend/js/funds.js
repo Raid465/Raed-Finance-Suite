@@ -172,7 +172,7 @@ async function analyzeFund(){
         </div>`;
 
         if(fundHoldings.length>0){
-            const fcolors=['#4f8cff','#34d399','#fb923c','#f87171','#4f8cff','#fbbf24','#60a5fa','#f472b6','#2dd4bf','#e879f9','#818cf8','#4ade80'];
+            const fcolors=['#2563eb','#15803d','#c2410c','#dc2626','#2563eb','#b45309','#3b82f6','#f472b6','#2dd4bf','#e879f9','#818cf8','#16a34a'];
             html+=`<div style="margin-top:16px">
                 <div style="color:var(--txt2);margin-bottom:10px;font-size:.9rem">أكبر الاستثمارات (${fundHoldings.length} عنصر)</div>
                 <div style="max-height:350px;margin-bottom:16px"><canvas id="ch-fund-holdings"></canvas></div>
@@ -205,7 +205,7 @@ async function analyzeFund(){
             if(pctDebt>0) html+=`<div style="width:${pctDebt}%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;color:#fff">${pctDebt>10?pctDebt+'% سندات':''}</div>`;
             if(pctCash>0) html+=`<div style="width:${pctCash}%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:600;color:#fff">${pctCash>10?pctCash+'% نقد':''}</div>`;
             html+=`</div></div>`;
-            html+=`<div style="margin-top:14px;padding:10px;background:rgba(79,140,255,.08);border-radius:var(--r);font-size:.82rem;color:var(--txt2)">
+            html+=`<div style="margin-top:14px;padding:10px;background:rgba(37,99,235,.08);border-radius:var(--r);font-size:.82rem;color:var(--txt2)">
                 ℹ️ بيانات الأصول الفعلية غير متوفرة لهذا الصندوق. التوزيع أعلاه تقديري.
             </div>`;
         }
@@ -226,7 +226,7 @@ async function analyzeFund(){
                 html+=`<tr>
                     <td style="direction:ltr">${esc(dist.date)}</td>
                     <td style="font-weight:700;color:var(--green)">${dist.amount.toFixed(4)} ${currencySymbol}</td>
-                    <td>${esc(dist.type)}${isRepeat?' <span style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:.75rem">مكرر</span>':''}</td>
+                    <td>${esc(dist.type)}${isRepeat?' <span style="background:rgba(180,83,9,.15);color:#b45309;padding:2px 8px;border-radius:10px;font-size:.75rem">مكرر</span>':''}</td>
                 </tr>`;
             });
             html+=`</tbody></table></div>`;
@@ -301,8 +301,8 @@ async function analyzeFund(){
             setTimeout(()=>{
                 const ctx=document.getElementById('ch-fund-holdings')?.getContext('2d');
                 if(ctx){
-                    const fcolors=['#4f8cff','#34d399','#fb923c','#f87171','#4f8cff','#fbbf24','#60a5fa','#f472b6','#2dd4bf','#e879f9','#818cf8','#4ade80'];
-                    new Chart(ctx,{type:'doughnut',data:{labels:fundHoldings.map(h=>h.name),datasets:[{data:fundHoldings.map(h=>h.weight),backgroundColor:fcolors.slice(0,fundHoldings.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'right',labels:{color:'#fff',padding:10,font:{size:11},boxWidth:14}},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed.toFixed(1)+'%'}}}}});
+                    const fcolors=['#2563eb','#15803d','#c2410c','#dc2626','#2563eb','#b45309','#3b82f6','#f472b6','#2dd4bf','#e879f9','#818cf8','#16a34a'];
+                    new Chart(ctx,{type:'doughnut',data:{labels:fundHoldings.map(h=>h.name),datasets:[{data:fundHoldings.map(h=>h.weight),backgroundColor:fcolors.slice(0,fundHoldings.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'right',labels:{color:'#1a1f2b',padding:10,font:{size:11},boxWidth:14}},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed.toFixed(1)+'%'}}}}});
                 }
             },100);
         }

@@ -64,7 +64,7 @@ function renderCompare(data,container){
                 const ovCanvas=document.getElementById('ch-ov');
                 if(ovCanvas){
                     destroyChart('ov');
-                    charts.ov=new Chart(ovCanvas.getContext('2d'),{type:'bar',data:{labels:shared.map(h=>h.symbol),datasets:[{label:a.info?.symbol||'A',data:shared.map(h=>h.weight_a),backgroundColor:'rgba(79,140,255,.7)',borderRadius:6},{label:b.info?.symbol||'B',data:shared.map(h=>h.weight_b),backgroundColor:'rgba(251,146,60,.7)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',scales:{x:{ticks:{color:'#a0a0b8',callback:v=>v+'%'},grid:{color:'rgba(255,255,255,.05)'}},y:{ticks:{color:'#e8e8f0',font:{weight:'bold'}},grid:{display:false}}},plugins:{legend:{labels:{color:'#a0a0b8',padding:14,font:{size:12}}}}}});
+                    charts.ov=new Chart(ovCanvas.getContext('2d'),{type:'bar',data:{labels:shared.map(h=>h.symbol),datasets:[{label:a.info?.symbol||'A',data:shared.map(h=>h.weight_a),backgroundColor:'rgba(37,99,235,.7)',borderRadius:6},{label:b.info?.symbol||'B',data:shared.map(h=>h.weight_b),backgroundColor:'rgba(194,65,12,.7)',borderRadius:6}]},options:{responsive:true,maintainAspectRatio:true,indexAxis:'y',scales:{x:{ticks:{color:'#5b6472',callback:v=>v+'%'},grid:{color:'rgba(15,23,42,.05)'}},y:{ticks:{color:'#1a1f2b',font:{weight:'bold'}},grid:{display:false}}},plugins:{legend:{labels:{color:'#5b6472',padding:14,font:{size:12}}}}}});
                 }
             }catch(e){console.error('Overlap chart error:',e)}
         }
@@ -146,7 +146,7 @@ function renderMulti(data,container,syms){
                     return{label:sym,data,borderColor:COLORS[i%COLORS.length],backgroundColor:COLORS[i%COLORS.length]+'20',fill:false,tension:.3,pointRadius:0,borderWidth:2};
                 });
                 const dates=perfEntries[0][1].dates.slice(0,minLen);
-                charts.perf=new Chart(perfCanvas.getContext('2d'),{type:'line',data:{labels:dates,datasets},options:{responsive:true,maintainAspectRatio:true,scales:{x:{ticks:{color:'#a0a0b8',maxTicksLimit:8,maxRotation:0},grid:{display:false}},y:{ticks:{color:'#a0a0b8',callback:v=>v.toFixed(1)+'%'},grid:{color:'rgba(255,255,255,.05)'}}},plugins:{legend:{labels:{color:'#ffffff',padding:14,font:{size:12,weight:'600'}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},interaction:{intersect:false,mode:'index'}}});
+                charts.perf=new Chart(perfCanvas.getContext('2d'),{type:'line',data:{labels:dates,datasets},options:{responsive:true,maintainAspectRatio:true,scales:{x:{ticks:{color:'#5b6472',maxTicksLimit:8,maxRotation:0},grid:{display:false}},y:{ticks:{color:'#5b6472',callback:v=>v.toFixed(1)+'%'},grid:{color:'rgba(15,23,42,.05)'}}},plugins:{legend:{labels:{color:'#1a1f2b',padding:14,font:{size:12,weight:'600'}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},interaction:{intersect:false,mode:'index'}}});
             }
         }catch(e){console.error('Performance chart error:',e)}
     }

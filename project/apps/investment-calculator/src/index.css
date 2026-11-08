@@ -2,8 +2,8 @@
 
 body {
   margin: 0;
-  background: #0f1117;
-  color: #e8e8f0;
+  background: #f6f7f9;
+  color: #1a1f2b;
   font-family: system-ui, -apple-system, sans-serif;
 }
 
@@ -29,16 +29,16 @@ input[type="number"] {
   top: 14px;
   right: 16px;
   padding: 8px 12px;
-  border: 1px solid #2e3350;
+  border: 1px solid #e3e6eb;
   border-radius: 6px;
-  background: #1a1d2e;
-  color: #e8e8f0;
+  background: #f1f3f6;
+  color: #1a1f2b;
   font: inherit;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
-.global-lang-toggle:hover { background: #222640; border-color:#4f8cff; }
+.global-lang-toggle:hover { background: #f1f3f6; border-color:#2563eb; }
 html[dir="rtl"] .global-lang-toggle { right: auto; left: 16px; }
 
-button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #4f8cff;outline-offset:2px}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #2563eb;outline-offset:2px}

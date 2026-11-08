@@ -110,7 +110,7 @@ async function analyzeSaudi(){
             html+=`<div style="max-height:350px;margin-bottom:16px"><canvas id="ch-saudi-holdings"></canvas></div>`;
             // Table
             html+=`<div style="overflow-x:auto"><table><thead><tr><th>#</th><th>الاسم</th><th>الوزن</th><th>الرسم البياني</th></tr></thead><tbody>`;
-            const colors=['#4f8cff','#34d399','#fb923c','#f87171','#4f8cff','#fbbf24','#60a5fa','#f472b6','#2dd4bf','#e879f9'];
+            const colors=['#2563eb','#15803d','#c2410c','#dc2626','#2563eb','#b45309','#3b82f6','#f472b6','#2dd4bf','#e879f9'];
             holdings.forEach((h,i)=>{
                 const barColor=colors[i%colors.length];
                 html+=`<tr>
@@ -128,7 +128,7 @@ async function analyzeSaudi(){
             setTimeout(()=>{
                 const ctx=document.getElementById('ch-saudi-holdings')?.getContext('2d');
                 if(ctx){
-                    new Chart(ctx,{type:'doughnut',data:{labels:holdings.map(h=>h.name),datasets:[{data:holdings.map(h=>h.weight),backgroundColor:colors.slice(0,holdings.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'right',labels:{color:'#fff',padding:10,font:{size:11},boxWidth:14}},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed.toFixed(1)+'%'}}}}});
+                    new Chart(ctx,{type:'doughnut',data:{labels:holdings.map(h=>h.name),datasets:[{data:holdings.map(h=>h.weight),backgroundColor:colors.slice(0,holdings.length),borderWidth:0}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{position:'right',labels:{color:'#1a1f2b',padding:10,font:{size:11},boxWidth:14}},tooltip:{callbacks:{label:c=>c.label+': '+c.parsed.toFixed(1)+'%'}}}}});
                 }
             },100);
         }
@@ -159,7 +159,7 @@ async function analyzeSaudi(){
                 html+=`<tr>
                     <td style="direction:ltr">${esc(dist.date)}</td>
                     <td style="font-weight:700;color:var(--green)">${dist.amount.toFixed(2)} ر.س</td>
-                    <td>${esc(dist.type)}${isRepeat?' <span style="background:rgba(251,191,36,.15);color:#fbbf24;padding:2px 8px;border-radius:10px;font-size:.75rem">مكرر</span>':''}</td>
+                    <td>${esc(dist.type)}${isRepeat?' <span style="background:rgba(180,83,9,.15);color:#b45309;padding:2px 8px;border-radius:10px;font-size:.75rem">مكرر</span>':''}</td>
                 </tr>`;
             });
             html+=`</tbody></table></div>`;
@@ -201,7 +201,7 @@ async function loadSaudiChart(sym,period,btn){
             if(!ctx)return;
             const prices=d.data.map(x=>x.close);
             const isUp=prices[prices.length-1]>=prices[0];
-            charts.saudi=new Chart(ctx,{type:'line',data:{labels:d.data.map(x=>x.date),datasets:[{label:sym,data:prices,borderColor:isUp?'#34d399':'#f87171',backgroundColor:isUp?'rgba(52,211,153,.1)':'rgba(248,113,113,.1)',fill:true,tension:.3,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:true,scales:{x:{ticks:{color:'#a0a0b8',maxTicksLimit:8,maxRotation:0},grid:{display:false}},y:{ticks:{color:'#a0a0b8',callback:v=>v.toFixed(2)},grid:{color:'rgba(255,255,255,.05)'}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+' ر.س'}}},interaction:{intersect:false,mode:'index'}}});
+            charts.saudi=new Chart(ctx,{type:'line',data:{labels:d.data.map(x=>x.date),datasets:[{label:sym,data:prices,borderColor:isUp?'#15803d':'#dc2626',backgroundColor:isUp?'rgba(21,128,61,.1)':'rgba(220,38,38,.1)',fill:true,tension:.3,pointRadius:0,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:true,scales:{x:{ticks:{color:'#5b6472',maxTicksLimit:8,maxRotation:0},grid:{display:false}},y:{ticks:{color:'#5b6472',callback:v=>v.toFixed(2)},grid:{color:'rgba(15,23,42,.05)'}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(2)+' ر.س'}}},interaction:{intersect:false,mode:'index'}}});
         }
     }catch(e){console.error('Saudi chart error:',e)}
 }
@@ -263,9 +263,9 @@ async function compareSaudi(){
                 const retB=hB.data.map(d=>((d.close/baseB)-1)*100);
                 const minLen=Math.min(retA.length,retB.length);
                 charts.saudiCmp=new Chart(ctx,{type:'line',data:{labels:hA.data.slice(0,minLen).map(d=>d.date),datasets:[
-                    {label:a,data:retA.slice(0,minLen),borderColor:'#4f8cff',fill:false,tension:.3,pointRadius:0,borderWidth:2},
-                    {label:b,data:retB.slice(0,minLen),borderColor:'#fb923c',fill:false,tension:.3,pointRadius:0,borderWidth:2}
-                ]},options:{responsive:true,maintainAspectRatio:true,scales:{x:{ticks:{color:'#a0a0b8',maxTicksLimit:8,maxRotation:0},grid:{display:false}},y:{ticks:{color:'#a0a0b8',callback:v=>v.toFixed(1)+'%'},grid:{color:'rgba(255,255,255,.05)'}}},plugins:{legend:{labels:{color:'#fff',padding:14,font:{size:12}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},interaction:{intersect:false,mode:'index'}}});
+                    {label:a,data:retA.slice(0,minLen),borderColor:'#2563eb',fill:false,tension:.3,pointRadius:0,borderWidth:2},
+                    {label:b,data:retB.slice(0,minLen),borderColor:'#c2410c',fill:false,tension:.3,pointRadius:0,borderWidth:2}
+                ]},options:{responsive:true,maintainAspectRatio:true,scales:{x:{ticks:{color:'#5b6472',maxTicksLimit:8,maxRotation:0},grid:{display:false}},y:{ticks:{color:'#5b6472',callback:v=>v.toFixed(1)+'%'},grid:{color:'rgba(15,23,42,.05)'}}},plugins:{legend:{labels:{color:'#1a1f2b',padding:14,font:{size:12}}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toFixed(2)+'%'}}},interaction:{intersect:false,mode:'index'}}});
             }
         }
     }catch(e){showErr(e.message);el.innerHTML=''}
