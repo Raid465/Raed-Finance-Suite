@@ -667,6 +667,20 @@ def load_mutual_funds():
     return _MUTUAL_FUNDS_CACHE
 
 
+def mutual_funds_as_of():
+    """Latest valuation date in the bundled dataset (YYYY/MM/DD), or None.
+
+    The mutual-fund list is a static snapshot shipped with the app, so the UI
+    shows this date to make clear how old the numbers are.
+    """
+    dates = []
+    for f in load_mutual_funds():
+        parts = str(f.get("valuationDate", "")).strip().replace("-", "/").split("/")
+        if len(parts) == 3 and all(p.isdigit() for p in parts):
+            dates.append(f"{int(parts[0]):04d}/{int(parts[1]):02d}/{int(parts[2]):02d}")
+    return max(dates) if dates else None
+
+
 @app.get("/api/mutual-funds")
 async def get_mutual_funds(
     search: Optional[str] = Query(None, description="Search by name"),
@@ -737,6 +751,7 @@ async def get_mutual_funds(
         "page": page,
         "page_size": page_size,
         "total_pages": (total + page_size - 1) // page_size,
+        "data_as_of": mutual_funds_as_of(),
         "funds": paginated_funds,
         "filters": {
             "currencies": sorted(currencies),
@@ -780,6 +795,7 @@ async def get_mutual_funds_stats():
     return {
         "total_funds": total_funds,
         "total_nav": total_nav,
+        "data_as_of": mutual_funds_as_of(),
         "currencies": currencies,
         "objectives": objectives,
         "top_funds": top_funds

@@ -2,8 +2,10 @@ import fs from 'fs';
 import vm from 'vm';
 import ts from '../apps/investment-calculator/node_modules/typescript/lib/typescript.js';
 
-const f=new URL('../apps/investment-calculator/src/App.tsx', import.meta.url);
-const src=fs.readFileSync(f,'utf8');
+// The math lives in calculations.ts (no React). Strip `export` so the
+// functions can run in a plain vm context.
+const f=new URL('../apps/investment-calculator/src/calculations.ts', import.meta.url);
+const src=fs.readFileSync(f,'utf8').replace(/^export /gm,'');
 const sf=ts.createSourceFile(f.pathname,src,ts.ScriptTarget.Latest,true,ts.ScriptKind.TSX);
 const names=new Set(['calculateYearlyData','calculateGoalSeek','calculateGoalProjection','formatCompact']);
 const printer=ts.createPrinter();

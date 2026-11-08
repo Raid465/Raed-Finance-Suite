@@ -3,6 +3,8 @@ from html.parser import HTMLParser
 import re, sys
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _sources import etf_page, stock_ui, investment_app
 checks = []
 def check(name, cond, detail=''):
     checks.append(bool(cond))
@@ -25,13 +27,13 @@ check('Investment has language control', 'global-lang-toggle' in I and "dataset.
 
 # Stock comparison
 S=(ROOT/'apps/stock-comparison-tool/src/index.css').read_text(encoding='utf-8')
-SC=(ROOT/'apps/stock-comparison-tool/src/components/StockComparisonTool.jsx').read_text(encoding='utf-8')
-check('Stock stylesheet restored to classic baseline', S.strip() == '@tailwind base;\n@tailwind components;\n@tailwind utilities;')
+SC=stock_ui()
+check('Stock stylesheet uses the Tailwind 4 entry point', S.strip().startswith('@import "tailwindcss";'))
 check('Stock defaults to English', 'useState("en")' in SC)
 check('Stock includes English/Arabic language switch', 'setLang' in SC and ('English' in SC or 'العربية' in SC))
 
 # ETF
-E=(ROOT/'apps/etf-analysis/frontend/index.html').read_text(encoding='utf-8')
+E=etf_page()
 check('ETF defaults to English/LTR', '<html lang="en" dir="ltr">' in E and "DEFAULT_LANGUAGE='en'" in E and "let lang=DEFAULT_LANGUAGE" in E)
 check('ETF product redesign overlay removed', 'product-redesign' not in E)
 check('ETF has no glass/radial redesign', 'backdrop-filter' not in E and 'radial-gradient' not in E)

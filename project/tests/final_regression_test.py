@@ -8,6 +8,8 @@ import json, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _sources import etf_page, stock_ui, investment_app
 results=[]
 def check(name, cond, detail=''):
     results.append(bool(cond))
@@ -29,7 +31,7 @@ for app_name in ('investment-calculator','stock-comparison-tool'):
 text_ext={'.py','.js','.jsx','.ts','.tsx','.html','.css','.json'}
 cjk=[]
 for p in ROOT.rglob('*'):
-    if not p.is_file() or p.suffix.lower() not in text_ext or 'node_modules' in p.parts:
+    if not p.is_file() or p.suffix.lower() not in text_ext or 'node_modules' in p.parts or '.venv' in p.parts or 'dist' in p.parts:
         continue
     try: text=p.read_text(encoding='utf-8')
     except Exception: continue
@@ -44,7 +46,7 @@ check('Dashboard is English by default', '<html lang="en" dir="ltr">' in D and "
 check('Dashboard Open buttons are forced blue', 'background:#2563eb!important' in D.replace(' ',''))
 
 # ETF UI/localization/data preservation
-E=(ROOT/'apps/etf-analysis/frontend/index.html').read_text(encoding='utf-8')
+E=etf_page()
 for pair in [
     "['الدخل','Income']",
     "['المحافظة على رأس المال','Capital Preservation']",
@@ -73,7 +75,7 @@ check('Portfolio shares must be positive', 'shares: float = Field(gt=0)' in A)
 check('Watchlist user data is persistent outside extracted project', 'RaedFinanceSuite' in A and 'USER_DATA_DIR' in A)
 
 # Investment English coverage: every Arabic source literal must be covered by UI mapping.
-IAPP=(ROOT/'apps/investment-calculator/src/App.tsx').read_text(encoding='utf-8')
+IAPP=investment_app()
 IL=(ROOT/'apps/investment-calculator/src/uiLanguage.ts').read_text(encoding='utf-8')
 pairs=re.findall(r"\['((?:\\'|[^'])*)','((?:\\'|[^'])*)'\]",IL)
 keys=sorted([a.replace("\\'", "'") for a,_ in pairs], key=len, reverse=True)
@@ -87,7 +89,7 @@ check('Investment English translation covers all Arabic UI source text', not res
 check('Investment JOD defaults to English formatting', "JOD: { symbol: 'JOD', locale: 'en-JO', code: 'JOD' }" in IAPP)
 
 # Stock reliability/local host/default English
-SC=(ROOT/'apps/stock-comparison-tool/src/components/StockComparisonTool.jsx').read_text(encoding='utf-8')
+SC=stock_ui()
 SS=(ROOT/'apps/stock-comparison-tool/server.js').read_text(encoding='utf-8')
 check('Stock UI defaults to English', 'useState("en")' in SC)
 check('Stock browser API uses exact IPv4 host used by launcher', 'http://127.0.0.1:3001/api' in SC and 'http://localhost:3001/api' not in SC)

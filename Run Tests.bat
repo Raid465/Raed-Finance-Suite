@@ -2,7 +2,11 @@
 setlocal EnableExtensions
 cd /d "%~dp0project"
 title Raed Finance Suite - Full Tests
-where py >nul 2>nul && (set PY=py -3) || (set PY=python)
+if exist ".venv\Scripts\python.exe" (
+    set "PY=.venv\Scripts\python.exe"
+) else (
+    goto :missingdeps
+)
 
 where node >nul 2>nul
 if errorlevel 1 goto :missingdeps
@@ -14,8 +18,8 @@ if not exist "apps\stock-comparison-tool\node_modules\.bin\vite.cmd" goto :missi
 
 echo =====================================================
 echo RAED FINANCE SUITE - FINAL FULL TESTS
-echo Keep Start Raed Finance.bat running in the other window
-echo for the live-service checks near the end.
+echo Live-service checks at the end run only while
+echo Start Raed Finance.bat is running in another window.
 echo =====================================================
 echo.
 
@@ -56,8 +60,14 @@ echo [7/8] Exhaustive offline ETF API regression tests...
 if errorlevel 1 goto :failed
 
 echo [8/8] Live local-service and external market-data checks...
-%PY% tests\full_project_test.py
-if errorlevel 1 goto :failed
+rem Only when the suite is running; otherwise skip instead of failing.
+%PY% -c "import urllib.request as u; u.urlopen('http://127.0.0.1:5050/api/status', timeout=2)" >nul 2>nul
+if errorlevel 1 (
+    echo SKIPPED: the suite is not running. Start "Start Raed Finance.bat" and run this file again to include the live checks.
+) else (
+    %PY% tests\full_project_test.py
+    if errorlevel 1 goto :failed
+)
 
 echo.
 echo =====================================================
