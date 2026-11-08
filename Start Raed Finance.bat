@@ -99,8 +99,9 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-echo.
-echo Setup finished.
+rem start_all.py --install installs dependencies AND runs the suite, so
+rem when it returns the user has already stopped it: don't start it again.
+exit /b 0
 
 :START
 echo [4/4] Starting all servers...
