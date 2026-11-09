@@ -141,6 +141,10 @@ export const UI = {
     errSame: "أدخل رمزين مختلفين",
     errEmpty: "أدخل رمزَي السهمين",
     errFetch: "خطأ في جلب البيانات.",
+    errInvalid: "رمز غير صالح. استخدم حروفاً وأرقاماً فقط (مثل AAPL أو 2222.SR)",
+    errNotFound: "لم يتم العثور على هذا الرمز",
+    errOffline: "مصدر بيانات السوق غير متاح. تحقق من اتصال الإنترنت وحاول مرة أخرى.",
+    errServer: "خادم الأسهم لا يعمل. شغّل Start Raed Finance.bat ثم حاول مرة أخرى.",
     reasons: {
       profitMargin: "هامش ربح أعلى",
       revenueGrowth: "نمو أقوى",
@@ -213,6 +217,10 @@ export const UI = {
     errSame: "Please enter two different stock symbols",
     errEmpty: "Please enter two stock symbols",
     errFetch: "Error fetching stock data.",
+    errInvalid: "Invalid symbol. Use letters and digits only (e.g. AAPL or 2222.SR)",
+    errNotFound: "Symbol not found",
+    errOffline: "Market data source is unreachable. Check your internet connection and try again.",
+    errServer: "The stock server isn't running. Start Raed Finance.bat and try again.",
     reasons: {
       profitMargin: "higher profit margin",
       revenueGrowth: "stronger growth",

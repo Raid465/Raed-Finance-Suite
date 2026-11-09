@@ -129,6 +129,17 @@ try:
 except Exception as exc:
     check('ETF validation harness loads', False, repr(exc))
 
+# Bugs found in the full feature walkthrough (2026-11-09).
+CORE=(ROOT/'apps/etf-analysis/frontend/js/core.js').read_text(encoding='utf-8')
+check('Saudi compare can use the shared cm() tile helper (defined at top level in core.js)', re.search(r'^function cm\(', CORE, re.M) is not None)
+check('Market movers does not cache an empty (failed) Yahoo result', 'if gainers or losers:' in ED)
+check('Market movers shows a message when no data comes back', 'بيانات السوق غير متاحة حالياً' in E)
+check('Mutual-fund stats labels the fund count correctly', 'عدد الصناديق</div><div class="v">${d.total_funds}' in E)
+check('Stock UI shows specific, translated errors per HTTP status', all(k in SC for k in ('errInvalid','errNotFound','errOffline','errServer','e.status === 400','e.status === 404')))
+SIDX=(ROOT/'apps/stock-comparison-tool/index.html').read_text(encoding='utf-8')
+IIDX=(ROOT/'apps/investment-calculator/index.html').read_text(encoding='utf-8')
+check('React app pages have real English titles', '<title>Stock Comparison Tool</title>' in SIDX and '<html lang="en" dir="ltr">' in SIDX and '<title>Investment Calculator</title>' in IIDX)
+
 passed=all(results)
 print('\nFINAL REGRESSION RESULT:', 'ALL CHECKS PASSED' if passed else 'FAILURES FOUND')
 raise SystemExit(0 if passed else 1)

@@ -46,3 +46,5 @@ async function fastJson(url,ttl=CLIENT_CACHE_TTL){
     if(!r.ok){let msg='Request failed';try{const e=await r.json();msg=e.detail||msg}catch(_){}throw new Error(msg)}
     const data=await r.json();clientCacheSet(url,data);return data;
 }
+// One "A vs B" metric tile; shared by the US ETF and Saudi ETF comparisons.
+function cm(l,va,vb,f=v=>v){return`<div class="cmc"><div class="l">${l}</div><div class="vals"><span class="va">${f(va)}</span><span class="vs">𝕏</span><span class="vb">${f(vb)}</span></div></div>`}

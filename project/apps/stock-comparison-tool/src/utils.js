@@ -14,10 +14,17 @@ export const fmt = (n, s = "") => {
 export const fmtUSD = (n) => (n == null ? null : "$" + fmt(n));
 export const fmtPct = (n) => (n == null ? null : n.toFixed(2) + "%");
 
+// Throws an Error carrying the HTTP status (0 = server not reachable) so the
+// UI can show a specific, translated message.
 export async function fetchJSON(url) {
-  const res = await fetch(url);
-  const data = await res.json();
-  if (!res.ok || data.error) throw new Error(data.error);
+  let res;
+  try {
+    res = await fetch(url);
+  } catch {
+    throw Object.assign(new Error("Stock API is not reachable"), { status: 0 });
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error) throw Object.assign(new Error(data.error || res.statusText), { status: res.status });
   return data;
 }
 

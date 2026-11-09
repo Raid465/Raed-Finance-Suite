@@ -316,7 +316,7 @@ async function loadFundsStats(){
         const r=await fetch('/api/mutual-funds/stats');
         const d=await r.json();
         let html=`<div class="mg">
-            <div class="mc"><div class="l">Positions</div><div class="v">${d.total_funds}</div></div>
+            <div class="mc"><div class="l">عدد الصناديق</div><div class="v">${d.total_funds}</div></div>
             <div class="mc"><div class="l">إجمالي الأصول</div><div class="v">${fmtV(d.total_nav)}</div></div>
         </div>`;
 

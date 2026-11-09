@@ -39,7 +39,6 @@ function renderCompare(data,container){
             <p style="color:var(--txt2);margin-top:6px;font-size:.85rem">${ov.shared_count||0} أسهم مشتركة من ${ov.holdings_count_a||0}+${ov.holdings_count_b||0}</p>
         </div>`;
 
-        function cm(l,va,vb,f=v=>v){return`<div class="cmc"><div class="l">${l}</div><div class="vals"><span class="va">${f(va)}</span><span class="vs">𝕏</span><span class="vb">${f(vb)}</span></div></div>`}
         html+=`<div class="cd"><h2>مقارنة المؤشرات</h2><div class="lr"><div class="li"><span class="da"></span>${esc(a.info?.symbol||'A')}</div><div class="li"><span class="db"></span>${esc(b.info?.symbol||'B')}</div></div>
         <div class="cmr" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
             ${cm('السعر',mA.current_price,mB.current_price,fmtPr)}${cm('P/E',mA.trailing_pe,mB.trailing_pe)}${cm('P/B',mA.price_to_book,mB.price_to_book)}
@@ -162,6 +161,7 @@ async function loadMovers(){
         const r=await fetch('/api/movers?limit=10');
         if(!r.ok)throw new Error('Error');
         const d=await r.json();
+        if(!(d.gainers||[]).length&&!(d.losers||[]).length){el.innerHTML='<div class="cd"><p>بيانات السوق غير متاحة حالياً، حاول مرة أخرى بعد دقيقة</p></div>';return}
         let html='<div class="mv-row">';
         html+=`<div class="mv-col cd"><h2 style="color:var(--green)">Top Gainers</h2>`;
         d.gainers.forEach(g=>{html+=`<div class="mv-item" onclick="document.getElementById('inp').value=${q(g.symbol)};tab('analyze');analyze()">

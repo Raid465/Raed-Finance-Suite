@@ -25,6 +25,7 @@ export default function StockComparisonTool() {
   useEffect(() => {
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+    document.title = UI[lang].title;
   }, [lang]);
 
   useEffect(() => {
@@ -44,20 +45,25 @@ export default function StockComparisonTool() {
     setD1(null); setD2(null); setH1(null); setH2(null); setE1(null); setE2(null); setSum("");
     try {
       const [r1, r2, hist1, hist2, earn1, earn2] = await Promise.all([
-        fetchJSON(`${API}/stock/${t1.trim()}`),
-        fetchJSON(`${API}/stock/${t2.trim()}`),
-        fetchJSON(`${API}/history/${t1.trim()}`).catch(() => ({ history: [] })),
-        fetchJSON(`${API}/history/${t2.trim()}`).catch(() => ({ history: [] })),
-        fetchJSON(`${API}/earnings/${t1.trim()}`).catch(() => ({ quarterly: [], yearly: [] })),
-        fetchJSON(`${API}/earnings/${t2.trim()}`).catch(() => ({ quarterly: [], yearly: [] })),
+        fetchJSON(`${API}/stock/${encodeURIComponent(t1.trim())}`).catch(e => { e.ticker = t1.trim().toUpperCase(); throw e; }),
+        fetchJSON(`${API}/stock/${encodeURIComponent(t2.trim())}`).catch(e => { e.ticker = t2.trim().toUpperCase(); throw e; }),
+        fetchJSON(`${API}/history/${encodeURIComponent(t1.trim())}`).catch(() => ({ history: [] })),
+        fetchJSON(`${API}/history/${encodeURIComponent(t2.trim())}`).catch(() => ({ history: [] })),
+        fetchJSON(`${API}/earnings/${encodeURIComponent(t1.trim())}`).catch(() => ({ quarterly: [], yearly: [] })),
+        fetchJSON(`${API}/earnings/${encodeURIComponent(t2.trim())}`).catch(() => ({ quarterly: [], yearly: [] })),
       ]);
       setD1(r1); setD2(r2);
       setH1(hist1.history); setH2(hist2.history);
       setE1(earn1); setE2(earn2);
       setSum(generateSummary(r1, r2, lang));
     } catch (e) {
-      // Keep error text consistent with the selected UI language.
-      setErr(t.errFetch);
+      // Translated message for what actually went wrong (see server.js status codes).
+      const who = e.ticker ? ` (${e.ticker})` : "";
+      if (e.status === 400) setErr(t.errInvalid + who);
+      else if (e.status === 404) setErr(t.errNotFound + who);
+      else if (e.status === 0) setErr(t.errServer);
+      else if (e.status === 503) setErr(t.errOffline);
+      else setErr(t.errFetch + who);
     } finally {
       setLoading(false);
     }
