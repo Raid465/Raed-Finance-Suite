@@ -121,6 +121,6 @@ html[dir="rtl"] .lang-toggle{right:auto;left:16px}
 }
 /* Dark theme: same layout, dark surfaces. Toggled by js/theme.js. */
 html[data-theme="dark"]{--bg:#0f1420;--bg2:#161c29;--card:#1a2130;--input:#121826;--txt:#e6e9ef;--txt2:#9aa4b2;--blue:#3b82f6;--blue-hover:#2563eb;--green:#22c55e;--red:#f87171;--orange:#fb923c;--yellow:#fbbf24;--border:#2a3140;--shadow:0 1px 2px rgba(0,0,0,.4);color-scheme:dark}
-.theme-toggle{position:fixed;top:14px;right:112px;z-index:10000;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--txt);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+.theme-toggle{display:inline-flex;align-items:center;gap:6px;position:fixed;top:14px;right:112px;z-index:10000;padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--txt);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
 .theme-toggle:hover{border-color:var(--blue)}
 html[dir="rtl"] .theme-toggle{right:auto;left:112px}

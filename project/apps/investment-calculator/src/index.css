@@ -49,6 +49,7 @@ body{background:var(--rf-bg);color:var(--rf-text)}
 .recharts-cartesian-grid line{stroke:var(--rf-border)}
 .recharts-cartesian-axis-line,.recharts-cartesian-axis-tick-line{stroke:var(--rf-axis)}
 .recharts-cartesian-axis-tick-value,.recharts-cartesian-axis-tick text,.recharts-polar-angle-axis-tick text,.recharts-legend-item-text{fill:var(--rf-muted)}
-.rf-theme-toggle{position:fixed;bottom:16px;right:16px;z-index:10000;padding:8px 12px;border:1px solid var(--rf-border);border-radius:6px;background:var(--rf-card);color:var(--rf-text);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+.rf-theme-toggle{display:inline-flex;align-items:center;gap:6px;position:fixed;top:14px;right:112px;z-index:10000;padding:8px 12px;border:1px solid var(--rf-border);border-radius:6px;background:var(--rf-card);color:var(--rf-text);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
 .rf-theme-toggle:hover{border-color:#2563eb}
-html[dir="rtl"] .rf-theme-toggle{right:auto;left:16px}
+html[dir="rtl"] .rf-theme-toggle{right:auto;left:112px}
+.rf-theme-toggle.rf-docked{position:static;border-radius:8px;font-size:12px;font-weight:700;padding:8px 14px}

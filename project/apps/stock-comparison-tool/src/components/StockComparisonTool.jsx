@@ -76,14 +76,17 @@ export default function StockComparisonTool() {
 
         {/* Header with Language Switcher */}
         <div className="relative text-center mb-2">
-          <div className="flex justify-end mb-2 sm:mb-0 sm:absolute sm:top-0 sm:right-0">
+          <div className="flex justify-end gap-2 mb-2 sm:mb-0 sm:absolute sm:top-0 sm:right-0">
+            <span data-rf-theme-slot className="contents" />
             <button
               onClick={toggleLanguage}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-colors border"
               style={{ background: C.card, color: C.text, borderColor: C.border }}
               title={lang === "ar" ? "Switch to English" : "التحويل للعربية"}
             >
-              <span className="text-base">🌐</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" /><path d="M2 12h20" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
               <span>{lang === "ar" ? "English" : "العربية"}</span>
             </button>
           </div>

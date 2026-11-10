@@ -99,8 +99,8 @@ export default function App() {
     <div className="min-h-screen bg-[var(--rf-bg)]">
       {/* Header */}
       <header className="border-b border-[var(--rf-border)] bg-[var(--rf-card)] sticky top-0 z-50">
-        {/* pe-28 leaves room for the fixed language button (it flips sides in RTL) */}
-        <div className="max-w-7xl mx-auto px-4 pe-28 py-4 flex items-center justify-between">
+        {/* pe-56 leaves room for the fixed theme + language buttons (it flips sides in RTL) */}
+        <div className="max-w-7xl mx-auto px-4 pe-56 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-[#2563eb]/15 rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-[#2563eb]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
