@@ -71,7 +71,7 @@ ED=(ROOT/'apps/etf-analysis/backend/etf_data.py').read_text(encoding='utf-8')
 check('Mutual-fund requests do not mutate shared cached list', 'funds = list(load_mutual_funds())' in A)
 check('ETF YTD decimal return is converted to percent', 'round(ytd_return * 100, 2)' in ED)
 check('Alert direction is validated', 'Literal["above", "below"]' in A)
-check('Portfolio shares must be positive', 'shares: float = Field(gt=0)' in A)
+check('Portfolio shares must be positive', 'shares: float = Field(gt=0' in A)
 check('Watchlist user data is persistent outside extracted project', 'RaedFinanceSuite' in A and 'USER_DATA_DIR' in A)
 
 # Investment English coverage: every Arabic source literal must be covered by UI mapping.

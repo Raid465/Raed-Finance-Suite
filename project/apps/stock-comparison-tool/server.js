@@ -15,8 +15,43 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+// Don't advertise the framework ("X-Powered-By: Express") to scanners.
+app.disable("x-powered-by");
+
+// Behind a reverse proxy (nginx, Caddy, Hostinger) every request arrives from
+// the proxy's IP, so the rate limit would hit all visitors at once. Set
+// TRUST_PROXY=1 only when such a proxy is in front; then the real client IP
+// from X-Forwarded-For is used. Never set it without a proxy: clients could
+// fake that header to dodge the limit.
+if (process.env.TRUST_PROXY) app.set("trust proxy", Number(process.env.TRUST_PROXY) || 1);
+
+app.use((req, res, next) => {
+  res.set({
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+  });
+  next();
+});
 app.use(limiter);
-app.use(cors());
+
+// Only the Stock Comparison page may call this API from a browser. Before,
+// cors() allowed every website, so any page a visitor opened could use this
+// server (and its Yahoo quota) through their browser. Extra origins, such as
+// a public domain, go in ALLOWED_ORIGINS, comma-separated.
+const ALLOWED_ORIGINS = new Set([
+  "http://127.0.0.1:5174",
+  "http://localhost:5174",
+  ...String(process.env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean),
+]);
+app.use(cors({
+  origin: (origin, cb) => cb(null, !origin || ALLOWED_ORIGINS.has(origin)),
+  methods: ["GET"],
+}));
+app.use((req, res, next) => (req.method === "GET" || req.method === "OPTIONS" || req.method === "HEAD")
+  ? next()
+  : res.status(405).json({ error: "Method not allowed." }));
 
 // ─── Cache ──────────────────────────────────────────────────────────────────
 const cache = new Map();

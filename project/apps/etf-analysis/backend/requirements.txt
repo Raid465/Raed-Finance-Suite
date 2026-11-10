@@ -1,6 +1,7 @@
 # Bounded ranges: tested with the versions in the comments, and capped below
 # the next major/minor release so a fresh install can't pull a breaking change.
-fastapi>=0.115.0,<0.116      # tested 0.115.6
+fastapi>=0.162.4,<0.163     # tested 0.162.4
+starlette>=1.3.1,<2          # tested 1.10.0 (older versions have known security holes)
 uvicorn>=0.30.6,<0.35        # tested 0.34.0
 yfinance>=1.5.0,<2           # tested 1.5.1
 numpy>=1.24.0,<3             # tested 2.5.1
