@@ -20,7 +20,7 @@ check('Dashboard has Arabic toggle', 'id="lang"' in D and 'العربية' in D 
 # Investment calculator
 I=(ROOT/'apps/investment-calculator/src/index.css').read_text(encoding='utf-8')
 IL=(ROOT/'apps/investment-calculator/src/uiLanguage.ts').read_text(encoding='utf-8')
-check('Investment uses the Clean Light background', 'background: #f6f7f9' in I and '#0f1117' not in I)
+check('Investment uses the Clean Light background', '--rf-bg:#f6f7f9' in I and '#0f1117' not in I)
 check('Investment has no glass/radial redesign', 'backdrop-filter' not in I and 'radial-gradient' not in I)
 check('Investment defaults to English', "let lang: 'en'|'ar' = 'en'" in IL)
 check('Investment has language control', 'global-lang-toggle' in I and "dataset.langToggle" in IL)
@@ -28,7 +28,7 @@ check('Investment has language control', 'global-lang-toggle' in I and "dataset.
 # Stock comparison
 S=(ROOT/'apps/stock-comparison-tool/src/index.css').read_text(encoding='utf-8')
 SC=stock_ui()
-check('Stock comparison uses the Clean Light palette', 'bg: "#f6f7f9"' in SC and 'card: "#ffffff"' in SC)
+check('Stock comparison uses the Clean Light palette', 'bg: "var(--rf-bg)"' in SC and '--rf-bg:#f6f7f9' in S and '--rf-card:#ffffff' in S)
 check('Stock stylesheet uses the Tailwind 4 entry point', S.strip().startswith('@import "tailwindcss";'))
 check('Stock defaults to English', 'useState("en")' in SC)
 check('Stock includes English/Arabic language switch', 'setLang' in SC and ('English' in SC or 'العربية' in SC))

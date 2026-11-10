@@ -2,9 +2,9 @@
 // Clean Light theme - same tokens as project/design-system/tokens.css.
 
 export const C = {
-  s1: "#2563eb", s2: "#ea580c", bg: "#f6f7f9",
-  card: "#ffffff", border: "#e3e6eb",
-  text: "#1a1f2b", muted: "#5b6472",
+  s1: "#2563eb", s2: "#ea580c", bg: "var(--rf-bg)",
+  card: "var(--rf-card)", border: "var(--rf-border)",
+  text: "var(--rf-text)", muted: "var(--rf-muted)",
   green: "#15803d", red: "#dc2626",
 };
 

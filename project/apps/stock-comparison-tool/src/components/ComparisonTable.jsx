@@ -52,7 +52,7 @@ export function Table({ d1, d2, lang }) {
             const v1 = r.f(d1[r.k]), v2 = r.f(d2[r.k]);
             if (!v1 && !v2) return null;
             return (
-              <tr key={r.k} style={{ background: i % 2 === 0 ? C.bg : C.card + "80" }}>
+              <tr key={r.k} style={{ background: i % 2 === 0 ? C.bg : C.card }}>
                 <td className="px-4 py-2.5 font-medium flex items-center" style={{ color: C.text }}>
                   {r.l}
                   {r.info && <InfoTip id={r.info} lang={lang} />}

@@ -28,9 +28,9 @@ export function InputField({
 
   return (
     <div className="space-y-1.5">
-      <label className="block text-sm font-medium text-[#1a1f2b]">
+      <label className="block text-sm font-medium text-[var(--rf-text)]">
         {label}
-        {suffix && <span className="text-[#5b6472] mr-1">({suffix})</span>}
+        {suffix && <span className="text-[var(--rf-muted)] mr-1">({suffix})</span>}
       </label>
       <div className="flex items-center gap-3">
         <input
@@ -44,7 +44,7 @@ export function InputField({
             onChange(v);
             if (!focused) setRaw(String(v));
           }}
-          className="flex-1 h-2 rounded-full appearance-none cursor-pointer bg-[#e3e6eb] accent-[#2563eb]"
+          className="flex-1 h-2 rounded-full appearance-none cursor-pointer bg-[var(--rf-border)] accent-[#2563eb]"
         />
         <input
           type="number"
@@ -72,7 +72,7 @@ export function InputField({
           min={min}
           max={max}
           step={step}
-          className="w-24 bg-[#ffffff] border border-[#e3e6eb] rounded-lg px-3 py-1.5 text-sm text-right text-[#1a1f2b] focus:outline-none focus:border-[#2563eb] transition"
+          className="w-24 bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-lg px-3 py-1.5 text-sm text-right text-[var(--rf-text)] focus:outline-none focus:border-[#2563eb] transition"
         />
       </div>
     </div>
@@ -83,7 +83,7 @@ export function MetricCard({
   label,
   value,
   subValue,
-  color = 'text-[#1a1f2b]',
+  color = 'text-[var(--rf-text)]',
   icon,
 }: {
   label: string;
@@ -93,13 +93,13 @@ export function MetricCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-4 space-y-2 hover:border-[#e3e6eb] transition">
+    <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-4 space-y-2 hover:border-[var(--rf-border)] transition">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[#5b6472] uppercase tracking-wider">{label}</p>
-        <div className="text-[#5b6472]">{icon}</div>
+        <p className="text-xs text-[var(--rf-muted)] uppercase tracking-wider">{label}</p>
+        <div className="text-[var(--rf-muted)]">{icon}</div>
       </div>
       <p className={`text-2xl font-bold ${color}`}>{value}</p>
-      {subValue && <p className="text-xs text-[#5b6472]">{subValue}</p>}
+      {subValue && <p className="text-xs text-[var(--rf-muted)]">{subValue}</p>}
     </div>
   );
 }
@@ -108,8 +108,8 @@ export function ChartTooltip({ active, payload, label, currency }: any) {
   if (!active || !payload?.length) return null;
   const total = payload.reduce((sum: number, p: any) => sum + (p.value || 0), 0);
   return (
-    <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-4 shadow-2xl text-sm min-w-[200px]">
-      <p className="text-[#5b6472] mb-3 font-medium border-b border-[#e3e6eb] pb-2">
+    <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-4 shadow-2xl text-sm min-w-[200px]">
+      <p className="text-[var(--rf-muted)] mb-3 font-medium border-b border-[var(--rf-border)] pb-2">
         📅 السنة {label}
       </p>
       {payload.map((entry: any, i: number) => {
@@ -120,15 +120,15 @@ export function ChartTooltip({ active, payload, label, currency }: any) {
               <span className="w-2 h-2 rounded-full" style={{ background: entry.color }} />
               {entry.name}
             </span>
-            <span className="font-mono font-bold text-[#1a1f2b]">
+            <span className="font-mono font-bold text-[var(--rf-text)]">
               {formatCurrency(entry.value, currency)}
-              <span className="text-xs text-[#5b6472] ml-1">({pct}%)</span>
+              <span className="text-xs text-[var(--rf-muted)] ml-1">({pct}%)</span>
             </span>
           </p>
         );
       })}
-      <div className="border-t border-[#e3e6eb] mt-2 pt-2 flex justify-between">
-        <span className="text-[#5b6472]">الإجمالي</span>
+      <div className="border-t border-[var(--rf-border)] mt-2 pt-2 flex justify-between">
+        <span className="text-[var(--rf-muted)]">الإجمالي</span>
         <span className="font-mono font-bold text-[#2563eb]">{formatCurrency(total, currency)}</span>
       </div>
     </div>
@@ -138,12 +138,12 @@ export function ChartTooltip({ active, payload, label, currency }: any) {
 export function GoalTooltip({ active, payload, label, currency }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-4 shadow-2xl text-sm min-w-[180px]">
-      <p className="text-[#5b6472] mb-2 font-medium">السنة {label}</p>
+    <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-4 shadow-2xl text-sm min-w-[180px]">
+      <p className="text-[var(--rf-muted)] mb-2 font-medium">السنة {label}</p>
       {payload.map((entry: any, i: number) => (
         <p key={i} className="flex justify-between gap-4 py-0.5">
           <span style={{ color: entry.color }}>{entry.name}</span>
-          <span className="font-mono font-bold text-[#1a1f2b]">{formatCurrency(entry.value, currency)}</span>
+          <span className="font-mono font-bold text-[var(--rf-text)]">{formatCurrency(entry.value, currency)}</span>
         </p>
       ))}
     </div>

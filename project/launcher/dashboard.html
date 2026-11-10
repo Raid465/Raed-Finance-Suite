@@ -4,8 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Raed Finance Suite</title>
+<script>try{if(localStorage.getItem('rf-theme')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}</script>
 <style>
 /* Clean Light theme - same tokens as design-system/tokens.css */
+html[data-theme="dark"]{--bg:#0f1420;--surface:#161c29;--card:#1a2130;--border:#2a3140;--text:#e6e9ef;--muted:#9aa4b2;--primary:#3b82f6;--primary-hover:#2563eb;--success:#22c55e;color-scheme:dark}
 :root{--bg:#f6f7f9;--surface:#f1f3f6;--card:#ffffff;--border:#e3e6eb;--text:#1a1f2b;--muted:#5b6472;--primary:#2563eb;--primary-hover:#1d4ed8;--success:#15803d}
 *{box-sizing:border-box}
 body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;min-height:100vh}
@@ -13,6 +15,7 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:v
 .top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:18px}
 h1{font-size:42px;margin:0}
 .lang-btn{padding:8px 12px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-weight:700;cursor:pointer}
+.top-btns{display:flex;gap:8px}
 .lang-btn:hover{border-color:var(--primary)}
 .sub{color:var(--muted);margin-bottom:34px;line-height:1.6}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
@@ -31,7 +34,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--primary);outline-of
 <div class="wrap">
   <div class="top">
     <h1>Raed Finance Suite</h1>
-    <button id="lang" class="lang-btn" type="button">العربية</button>
+    <div class="top-btns"><button id="theme" class="lang-btn" type="button"></button><button id="lang" class="lang-btn" type="button">العربية</button></div>
   </div>
   <div class="sub">
     <span class="lang-en">One local workspace for your finance and market-analysis projects.</span>
@@ -62,6 +65,21 @@ let l='en';
 function applyLang(){document.documentElement.lang=l;document.documentElement.dir=l==='ar'?'rtl':'ltr';b.textContent=l==='en'?'العربية':'English'}
 b.addEventListener('click',()=>{l=l==='en'?'ar':'en';applyLang()});
 applyLang();
+// Each app runs on its own port, so it can't read this page's saved theme;
+// pass it along in the links instead.
+const tb=document.getElementById('theme');
+function isDark(){return document.documentElement.getAttribute('data-theme')==='dark'}
+function applyTheme(){
+  const t=isDark()?'dark':'light';
+  tb.textContent=isDark()?'☀ Light':'☾ Dark';
+  document.querySelectorAll('a.btn').forEach(a=>{const u=new URL(a.href);u.searchParams.set('theme',t);a.href=u.toString()});
+}
+tb.addEventListener('click',()=>{
+  if(isDark())document.documentElement.removeAttribute('data-theme');else document.documentElement.setAttribute('data-theme','dark');
+  try{localStorage.setItem('rf-theme',isDark()?'dark':'light')}catch(e){}
+  applyTheme();
+});
+applyTheme();
 </script>
 </body>
 </html>

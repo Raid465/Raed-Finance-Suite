@@ -96,9 +96,9 @@ export default function App() {
   const lastYear = yearData[yearData.length - 1];
 
   return (
-    <div className="min-h-screen bg-[#f6f7f9]">
+    <div className="min-h-screen bg-[var(--rf-bg)]">
       {/* Header */}
-      <header className="border-b border-[#e3e6eb] bg-[#ffffff] sticky top-0 z-50">
+      <header className="border-b border-[var(--rf-border)] bg-[var(--rf-card)] sticky top-0 z-50">
         {/* pe-28 leaves room for the fixed language button (it flips sides in RTL) */}
         <div className="max-w-7xl mx-auto px-4 pe-28 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -108,8 +108,8 @@ export default function App() {
               </svg>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-[#1a1f2b]">حاسبة الاستثمار</h1>
-              <p className="text-xs text-[#5b6472]">Compound Interest Calculator</p>
+              <h1 className="text-lg font-bold text-[var(--rf-text)]">حاسبة الاستثمار</h1>
+              <p className="text-xs text-[var(--rf-muted)]">Compound Interest Calculator</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -120,7 +120,7 @@ export default function App() {
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
                   currency === c
                     ? 'bg-[#2563eb]/15 text-[#2563eb] border border-[#2563eb]/40'
-                    : 'text-[#5b6472] hover:text-[#1a1f2b]'
+                    : 'text-[var(--rf-muted)] hover:text-[var(--rf-text)]'
                 }`}
               >
                 {c === 'USD' ? '$ دولار' : 'د.أ دينار'}
@@ -132,7 +132,7 @@ export default function App() {
 
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         {/* Tabs */}
-        <div className="flex gap-1 bg-[#f1f3f6] p-1 rounded-xl w-fit mx-auto">
+        <div className="flex gap-1 bg-[var(--rf-surface)] p-1 rounded-xl w-fit mx-auto">
           {([
             { key: 'calculator', label: 'الحاسبة', icon: '🧮' },
             { key: 'scenarios', label: 'مقارنة السيناريوهات', icon: '📊' },
@@ -144,7 +144,7 @@ export default function App() {
               className={`px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 ${
                 activeTab === tab.key
                   ? 'bg-[#2563eb] text-white'
-                  : 'text-[#5b6472] hover:text-[#1a1f2b]'
+                  : 'text-[var(--rf-muted)] hover:text-[var(--rf-text)]'
               }`}
             >
               <span className="hidden sm:inline">{tab.icon}</span>
@@ -157,8 +157,8 @@ export default function App() {
         {activeTab === 'calculator' && (
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Inputs */}
-            <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-6 space-y-5">
-              <h2 className="text-[#1a1f2b] font-bold text-lg flex items-center gap-2">
+            <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-6 space-y-5">
+              <h2 className="text-[var(--rf-text)] font-bold text-lg flex items-center gap-2">
                 <span className="w-2 h-2 bg-[#2563eb] rounded-full" />
                 معطيات الاستثمار
               </h2>
@@ -167,10 +167,10 @@ export default function App() {
               <InputField label="معدل العائد السنوي" value={inputs.annualRate} onChange={(v) => updateInput('annualRate', v)} min={0} max={50} step={0.5} suffix="%" />
               <InputField label="عدد السنوات" value={inputs.years} onChange={(v) => updateInput('years', v)} min={1} max={50} step={1} suffix="سنة" />
 
-              <div className="border-t border-[#e3e6eb] pt-4 space-y-3">
+              <div className="border-t border-[var(--rf-border)] pt-4 space-y-3">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input type="checkbox" checked={inputs.adjustForInflation} onChange={(e) => updateInput('adjustForInflation', e.target.checked)} className="w-4 h-4 rounded accent-[#2563eb]" />
-                  <span className="text-sm text-[#1a1f2b] group-hover:text-[#1a1f2b] transition">تعديل حسب التضخم</span>
+                  <span className="text-sm text-[var(--rf-text)] group-hover:text-[var(--rf-text)] transition">تعديل حسب التضخم</span>
                 </label>
                 {inputs.adjustForInflation && (
                   <InputField label="معدل التضخم السنوي" value={inputs.inflationRate} onChange={(v) => updateInput('inflationRate', v)} min={0} max={30} step={0.5} suffix="%" />
@@ -216,13 +216,13 @@ export default function App() {
               )}
 
               {/* Chart */}
-              <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-6">
+              <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-[#1a1f2b] font-bold">نمو المحفظة</h3>
+                  <h3 className="text-[var(--rf-text)] font-bold">نمو المحفظة</h3>
                   <div className="flex items-center gap-4 text-xs">
                     <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-blue-500" /> مستثمر</span>
                     <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-emerald-500" /> أرباح</span>
-                    <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-[#1a1f2b]/30" /> الإجمالي</span>
+                    <span className="flex items-center gap-1.5"><span className="w-3 h-1.5 rounded-full bg-[var(--rf-text)]/30" /> الإجمالي</span>
                   </div>
                 </div>
                 <ResponsiveContainer width="100%" height={350}>
@@ -249,20 +249,20 @@ export default function App() {
               </div>
 
               {/* Table */}
-              <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-6 overflow-x-auto">
-                <h3 className="text-[#1a1f2b] font-bold mb-4">جدول تفصيلي سنة بسنة</h3>
+              <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-6 overflow-x-auto">
+                <h3 className="text-[var(--rf-text)] font-bold mb-4">جدول تفصيلي سنة بسنة</h3>
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[#e3e6eb]">
+                    <tr className="border-b border-[var(--rf-border)]">
                       {['السنة', 'المستثمر التراكمي', 'قيمة المحفظة', 'الأرباح', 'النمو', ...(inputs.adjustForInflation ? ['القيمة الحقيقية'] : [])].map((h) => (
-                        <th key={h} className="py-3 px-2 text-[#5b6472] font-medium text-right">{h}</th>
+                        <th key={h} className="py-3 px-2 text-[var(--rf-muted)] font-medium text-right">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {yearData.map((d) => (
-                      <tr key={d.year} className="border-b border-[#e3e6eb] hover:bg-[#ffffff]/20 transition">
-                        <td className="py-2.5 px-2 text-[#1a1f2b] font-mono">{d.year}</td>
+                      <tr key={d.year} className="border-b border-[var(--rf-border)] hover:bg-[var(--rf-card)]/20 transition">
+                        <td className="py-2.5 px-2 text-[var(--rf-text)] font-mono">{d.year}</td>
                         <td className="py-2.5 px-2 text-blue-700 font-mono text-right">{formatCurrency(d.invested, currency)}</td>
                         <td className="py-2.5 px-2 text-[#2563eb] font-mono text-right">{formatCurrency(d.portfolioValue, currency)}</td>
                         <td className="py-2.5 px-2 text-amber-700 font-mono text-right">{formatCurrency(d.earnings, currency)}</td>
@@ -283,8 +283,8 @@ export default function App() {
         {activeTab === 'scenarios' && (
           <div className="space-y-6">
             {/* Shared Inputs */}
-            <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-5">
-              <h3 className="text-[#1a1f2b] font-bold mb-4 flex items-center gap-2">
+            <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-5">
+              <h3 className="text-[var(--rf-text)] font-bold mb-4 flex items-center gap-2">
                 <span className="w-2 h-2 bg-blue-400 rounded-full" />
                 المعطيات المشتركة لجميع السيناريوهات
               </h3>
@@ -300,23 +300,23 @@ export default function App() {
                 const data = calculateYearlyData(inputs, scenario.annualRate);
                 const last = data[data.length - 1];
                 return (
-                  <div key={scenario.id} className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-5 space-y-3 hover:border-[#e3e6eb] transition">
+                  <div key={scenario.id} className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-5 space-y-3 hover:border-[var(--rf-border)] transition">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: scenario.color }} />
                       <input
                         type="text"
                         value={scenario.name}
                         onChange={(e) => setScenarios((prev) => prev.map((s) => s.id === scenario.id ? { ...s, name: e.target.value } : s))}
-                        className="bg-transparent text-[#1a1f2b] font-bold text-lg border-none outline-none w-full"
+                        className="bg-transparent text-[var(--rf-text)] font-bold text-lg border-none outline-none w-full"
                       />
                     </div>
                     <InputField label="معدل العائد السنوي" value={scenario.annualRate} onChange={(v) => setScenarios((prev) => prev.map((s) => s.id === scenario.id ? { ...s, annualRate: v } : s))} min={0} max={50} step={0.5} suffix="%" />
                     {last && (
-                      <div className="pt-2 border-t border-[#e3e6eb] space-y-1">
-                        <p className="text-sm text-[#5b6472]">القيمة النهائية: <span className="text-[#1a1f2b] font-bold">{formatCurrency(last.portfolioValue, currency)}</span></p>
-                        <p className="text-sm text-[#5b6472]">المستثمر: <span className="text-blue-700 font-bold">{formatCurrency(last.invested, currency)}</span></p>
-                        <p className="text-sm text-[#5b6472]">الأرباح: <span className="text-amber-700 font-bold">{formatCurrency(last.earnings, currency)}</span></p>
-                        <p className="text-sm text-[#5b6472]">النمو: <span className="text-purple-700 font-bold">{last.growthPercent}%</span></p>
+                      <div className="pt-2 border-t border-[var(--rf-border)] space-y-1">
+                        <p className="text-sm text-[var(--rf-muted)]">القيمة النهائية: <span className="text-[var(--rf-text)] font-bold">{formatCurrency(last.portfolioValue, currency)}</span></p>
+                        <p className="text-sm text-[var(--rf-muted)]">المستثمر: <span className="text-blue-700 font-bold">{formatCurrency(last.invested, currency)}</span></p>
+                        <p className="text-sm text-[var(--rf-muted)]">الأرباح: <span className="text-amber-700 font-bold">{formatCurrency(last.earnings, currency)}</span></p>
+                        <p className="text-sm text-[var(--rf-muted)]">النمو: <span className="text-purple-700 font-bold">{last.growthPercent}%</span></p>
                       </div>
                     )}
                   </div>
@@ -325,8 +325,8 @@ export default function App() {
             </div>
 
             {/* Comparison Chart */}
-            <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-6">
-              <h3 className="text-[#1a1f2b] font-bold mb-4">مقارنة السيناريوهات — القيمة الإجمالية</h3>
+            <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-6">
+              <h3 className="text-[var(--rf-text)] font-bold mb-4">مقارنة السيناريوهات — القيمة الإجمالية</h3>
               <ResponsiveContainer width="100%" height={400}>
                 <AreaChart data={scenarioChartData}>
                   <defs>
@@ -341,7 +341,7 @@ export default function App() {
                   <XAxis dataKey="year" stroke="#cbd2da" tick={{ fill: '#5b6472', fontSize: 12 }} tickLine={false} />
                   <YAxis stroke="#cbd2da" tick={{ fill: '#5b6472', fontSize: 12 }} tickFormatter={formatCompact} tickLine={false} width={60} />
                   <Tooltip content={<ChartTooltip currency={currency} />} />
-                  <Legend wrapperStyle={{ paddingTop: '10px' }} formatter={(v) => <span style={{ color: '#cbd5e1', fontSize: 13 }}>{v}</span>} />
+                  <Legend wrapperStyle={{ paddingTop: '10px' }} formatter={(v) => <span style={{ color: 'var(--rf-muted)', fontSize: 13 }}>{v}</span>} />
                   {scenarios.map((s) => (
                     <Area key={s.id} type="monotone" dataKey={s.name} stroke={s.color} fill={`url(#sg-${s.id})`} strokeWidth={2.5} animationDuration={800} />
                   ))}
@@ -350,13 +350,13 @@ export default function App() {
             </div>
 
             {/* Comparison Table */}
-            <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-6 overflow-x-auto">
-              <h3 className="text-[#1a1f2b] font-bold mb-4">جدول المقارنة</h3>
+            <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-6 overflow-x-auto">
+              <h3 className="text-[var(--rf-text)] font-bold mb-4">جدول المقارنة</h3>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[#e3e6eb]">
+                  <tr className="border-b border-[var(--rf-border)]">
                     {['السيناريو', 'العائد', 'المستثمر', 'القيمة النهائية', 'الأرباح', 'النمو'].map((h) => (
-                      <th key={h} className="py-3 px-3 text-[#5b6472] font-medium text-right">{h}</th>
+                      <th key={h} className="py-3 px-3 text-[var(--rf-muted)] font-medium text-right">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -365,12 +365,12 @@ export default function App() {
                     const last = s.data[s.data.length - 1];
                     if (!last) return null;
                     return (
-                      <tr key={s.id} className="border-b border-[#e3e6eb] hover:bg-[#ffffff]/20 transition">
+                      <tr key={s.id} className="border-b border-[var(--rf-border)] hover:bg-[var(--rf-card)]/20 transition">
                         <td className="py-3 px-3 font-medium flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-                          <span className="text-[#1a1f2b]">{s.name}</span>
+                          <span className="text-[var(--rf-text)]">{s.name}</span>
                         </td>
-                        <td className="py-3 px-3 text-[#1a1f2b] font-mono text-right">{s.annualRate}%</td>
+                        <td className="py-3 px-3 text-[var(--rf-text)] font-mono text-right">{s.annualRate}%</td>
                         <td className="py-3 px-3 text-blue-700 font-mono text-right">{formatCurrency(last.invested, currency)}</td>
                         <td className="py-3 px-3 text-[#2563eb] font-mono text-right font-bold">{formatCurrency(last.portfolioValue, currency)}</td>
                         <td className="py-3 px-3 text-amber-700 font-mono text-right">{formatCurrency(last.earnings, currency)}</td>
@@ -388,12 +388,12 @@ export default function App() {
         {activeTab === 'goal' && (
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Inputs */}
-            <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-6 space-y-5">
-              <h2 className="text-[#1a1f2b] font-bold text-lg flex items-center gap-2">
+            <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-6 space-y-5">
+              <h2 className="text-[var(--rf-text)] font-bold text-lg flex items-center gap-2">
                 <span className="w-2 h-2 bg-amber-400 rounded-full" />
                 حاسبة الهدف العكسي
               </h2>
-              <p className="text-sm text-[#5b6472]">حدد هدفك المالي والأداة تحسب كم تحتاج تستثمر شهرياً للوصول إليه</p>
+              <p className="text-sm text-[var(--rf-muted)]">حدد هدفك المالي والأداة تحسب كم تحتاج تستثمر شهرياً للوصول إليه</p>
               <InputField label="المبلغ المستهدف" value={goalInputs.targetAmount} onChange={(v) => setGoalInputs((p) => ({ ...p, targetAmount: v }))} min={0} max={10000000} step={1000} suffix={currency === 'USD' ? '$' : 'د.أ'} />
               <InputField label="السنة المستهدفة" value={goalInputs.targetYear} onChange={(v) => setGoalInputs((p) => ({ ...p, targetYear: v }))} min={1} max={50} step={1} suffix="سنة" />
               <InputField label="رأس المال الابتدائي" value={goalInputs.initialAmount} onChange={(v) => setGoalInputs((p) => ({ ...p, initialAmount: v }))} min={0} max={1000000} step={1000} suffix={currency === 'USD' ? '$' : 'د.أ'} />
@@ -403,14 +403,14 @@ export default function App() {
             {/* Results */}
             <div className="space-y-6">
               {/* Main Result */}
-              <div className={`border rounded-xl p-8 text-center space-y-4 ${goalResult.isAlreadyReached ? 'bg-[#ffffff] border-amber-600/30' : 'bg-[#ffffff] border-[#2563eb]/30'}`}>
+              <div className={`border rounded-xl p-8 text-center space-y-4 ${goalResult.isAlreadyReached ? 'bg-[var(--rf-card)] border-amber-600/30' : 'bg-[var(--rf-card)] border-[#2563eb]/30'}`}>
                 {goalResult.isAlreadyReached ? (
                   <>
                     <p className="text-amber-700 text-sm uppercase tracking-wider">الهدف محقق بالفعل!</p>
                     <p className="text-4xl font-bold text-[#2563eb]">
                       {formatCurrency(Math.round(goalResult.futureValueOfInitial), currency)}
                     </p>
-                    <p className="text-[#5b6472] text-sm">
+                    <p className="text-[var(--rf-muted)] text-sm">
                       رأس المال الابتدائي{' '}
                       {formatCurrency(goalInputs.initialAmount, currency)} كافٍ للوصول إلى{' '}
                       {formatCurrency(goalInputs.targetAmount, currency)} خلال {goalInputs.targetYear} سنة
@@ -419,11 +419,11 @@ export default function App() {
                   </>
                 ) : (
                   <>
-                    <p className="text-[#5b6472] text-sm uppercase tracking-wider">المبلغ الشهري المطلوب</p>
+                    <p className="text-[var(--rf-muted)] text-sm uppercase tracking-wider">المبلغ الشهري المطلوب</p>
                     <p className="text-5xl font-bold text-[#2563eb]">
                       {formatCurrency(Math.ceil(goalResult.monthlyPayment), currency)}
                     </p>
-                    <p className="text-[#5b6472] text-sm">
+                    <p className="text-[var(--rf-muted)] text-sm">
                       شهرياً لمدة {goalInputs.targetYear} سنة للوصول إلى {formatCurrency(goalInputs.targetAmount, currency)}
                     </p>
                   </>
@@ -431,37 +431,37 @@ export default function App() {
               </div>
 
               {/* Details */}
-              <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-6 space-y-3">
-                <h3 className="text-[#1a1f2b] font-bold">تفاصيل الحساب</h3>
+              <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-6 space-y-3">
+                <h3 className="text-[var(--rf-text)] font-bold">تفاصيل الحساب</h3>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between py-2 border-b border-[#e3e6eb]">
-                    <span className="text-[#5b6472]">المبلغ المستهدف</span>
-                    <span className="text-[#1a1f2b] font-mono">{formatCurrency(goalInputs.targetAmount, currency)}</span>
+                  <div className="flex justify-between py-2 border-b border-[var(--rf-border)]">
+                    <span className="text-[var(--rf-muted)]">المبلغ المستهدف</span>
+                    <span className="text-[var(--rf-text)] font-mono">{formatCurrency(goalInputs.targetAmount, currency)}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-[#e3e6eb]">
-                    <span className="text-[#5b6472]">رأس المال الابتدائي</span>
+                  <div className="flex justify-between py-2 border-b border-[var(--rf-border)]">
+                    <span className="text-[var(--rf-muted)]">رأس المال الابتدائي</span>
                     <span className="text-blue-700 font-mono">{formatCurrency(goalInputs.initialAmount, currency)}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-[#e3e6eb]">
-                    <span className="text-[#5b6472]">قيمة رأس المال بعد {goalInputs.targetYear} سنة</span>
+                  <div className="flex justify-between py-2 border-b border-[var(--rf-border)]">
+                    <span className="text-[var(--rf-muted)]">قيمة رأس المال بعد {goalInputs.targetYear} سنة</span>
                     <span className="text-cyan-700 font-mono">{formatCurrency(Math.round(goalResult.futureValueOfInitial), currency)}</span>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-[#e3e6eb]">
-                    <span className="text-[#5b6472]">الفجوة المطلوب تغطيتها</span>
+                  <div className="flex justify-between py-2 border-b border-[var(--rf-border)]">
+                    <span className="text-[var(--rf-muted)]">الفجوة المطلوب تغطيتها</span>
                     <span className="text-amber-700 font-mono">
                       {formatCurrency(Math.max(0, goalInputs.targetAmount - Math.round(goalResult.futureValueOfInitial)), currency)}
                     </span>
                   </div>
                   {!goalResult.isAlreadyReached && (
                     <>
-                      <div className="flex justify-between py-2 border-b border-[#e3e6eb]">
-                        <span className="text-[#5b6472]">إجمالي الاشتراكات الشهرية</span>
+                      <div className="flex justify-between py-2 border-b border-[var(--rf-border)]">
+                        <span className="text-[var(--rf-muted)]">إجمالي الاشتراكات الشهرية</span>
                         <span className="text-purple-700 font-mono">
                           {formatCurrency(Math.ceil(goalResult.monthlyPayment) * goalInputs.targetYear * 12, currency)}
                         </span>
                       </div>
                       <div className="flex justify-between py-2">
-                        <span className="text-[#5b6472]">إجمالي الأرباح المتوقعة</span>
+                        <span className="text-[var(--rf-muted)]">إجمالي الأرباح المتوقعة</span>
                         <span className="text-[#2563eb] font-mono">
                           {formatCurrency(
                             Math.max(0, goalInputs.targetAmount - goalInputs.initialAmount - Math.ceil(goalResult.monthlyPayment) * goalInputs.targetYear * 12),
@@ -476,8 +476,8 @@ export default function App() {
 
               {/* Goal Projection Chart */}
               {!goalResult.isAlreadyReached && goalProjection.length > 0 && (
-                <div className="bg-[#ffffff] border border-[#e3e6eb] rounded-xl p-6">
-                  <h3 className="text-[#1a1f2b] font-bold mb-4">مسورة النمو نحو الهدف</h3>
+                <div className="bg-[var(--rf-card)] border border-[var(--rf-border)] rounded-xl p-6">
+                  <h3 className="text-[var(--rf-text)] font-bold mb-4">مسورة النمو نحو الهدف</h3>
                   <ResponsiveContainer width="100%" height={280}>
                     <AreaChart data={goalChartData}>
                       <defs>
@@ -506,7 +506,7 @@ export default function App() {
         )}
       </main>
 
-      <footer className="border-t border-[#e3e6eb] mt-12 py-6 text-center text-sm text-[#5b6472]">
+      <footer className="border-t border-[var(--rf-border)] mt-12 py-6 text-center text-sm text-[var(--rf-muted)]">
         حاسبة الاستثمار التفاعلية — جميع الحسابات تقريبية ولا تُعتبر نصيحة مالية
       </footer>
     </div>
