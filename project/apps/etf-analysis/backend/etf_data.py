@@ -858,7 +858,10 @@ def get_top_movers(limit: int = 10) -> dict:
     gainers.sort(key=lambda x: x["change_pct"], reverse=True)
     losers.sort(key=lambda x: x["change_pct"])
     result = {"gainers": gainers[:limit], "losers": losers[:limit]}
-    cache.set(cache_key, result)
+    # Don't cache an empty result: it usually means Yahoo timed out, and
+    # caching it would keep the panel empty even after Yahoo recovers.
+    if gainers or losers:
+        cache.set(cache_key, result)
     return result
 
 

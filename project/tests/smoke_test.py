@@ -25,7 +25,7 @@ for name, url, marker in TESTS:
 try:
     with urllib.request.urlopen("http://127.0.0.1:5050", timeout=5) as r:
         dash = r.read().decode("utf-8", "ignore")
-        lang_ok = 'lang="en"' in dash and "suite_lang')||'en'" in dash
+        lang_ok = 'lang="en"' in dash and "let l='en'" in dash
         print(f"[{'PASS' if lang_ok else 'FAIL'}] Dashboard default language: English")
         ok &= lang_ok
 except Exception as e:

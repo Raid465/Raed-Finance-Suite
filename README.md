@@ -2,7 +2,7 @@
 
 A desktop-style finance workspace that combines ETF research, stock comparison, and long-term investment planning in one project.
 
-The suite includes three independent tools connected through a single launcher and a consistent dark financial dashboard.
+The suite includes three independent tools connected through a single launcher and a consistent Clean Light financial dashboard (white cards, one blue accent, green/red only for gains and losses).
 
 ## Features
 
@@ -53,7 +53,7 @@ The suite includes three independent tools connected through a single launcher a
 
 Install:
 
-- Python 3
+- Python 3.10 or newer
 - Node.js
 - npm
 
@@ -74,17 +74,17 @@ Start Raed Finance.bat
 
 The launcher starts the required services and opens the main dashboard automatically.
 
-The first run may take longer because missing dependencies can be installed automatically.
+The first run may take longer because missing dependencies can be installed automatically. Python packages go into a private environment at `project\.venv`, so your system Python is not changed.
 
 ## Run Tests
 
-Start the Finance Suite first and keep it running.
-
-Then run:
+Run:
 
 ```text
 Run Tests.bat
 ```
+
+The offline checks always run. The live service and market-data checks run only while `Start Raed Finance.bat` is running in another window; otherwise they are skipped.
 
 The test suite checks the main services, UI structure, ETF API routes, watchlist persistence, language behavior, investment calculations, and regression cases.
 

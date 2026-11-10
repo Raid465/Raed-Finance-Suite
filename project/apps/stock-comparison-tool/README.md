@@ -23,7 +23,7 @@ An interactive tool for comparing US stocks side by side, displaying comprehensi
 - ✅ Detailed comparison table with winner highlighting
 - ✅ Analyst target prices
 - ✅ Indicator explanations on hover (?)
-- ✅ Modern responsive design (Dark Mode)
+- ✅ Modern responsive design (Clean Light theme)
 
 ---
 
@@ -48,16 +48,20 @@ stock-comparison-tool/
 ├── index.html                         # Main HTML page
 ├── package.json                       # Dependencies & scripts
 ├── vite.config.js                     # Vite configuration
-├── tailwind.config.js                 # Tailwind configuration
-├── postcss.config.js                  # PostCSS configuration
 ├── .gitignore                         # Git ignored files
 ├── README.md                          # This file
 └── src/
     ├── main.jsx                       # Entry point
     ├── App.jsx                        # Main app component
-    ├── index.css                      # Tailwind styles
+    ├── index.css                      # Tailwind 4 entry + page colors
+    ├── i18n.js                        # English/Arabic strings
+    ├── theme.js                       # Clean Light colors
+    ├── utils.js                       # API URL, formatting, summary text
     └── components/
-        └── StockComparisonTool.jsx    # Main component
+        ├── StockComparisonTool.jsx    # Page layout and state
+        ├── StatCards.jsx              # Stock cards and stat rows
+        ├── Charts.jsx                 # Recharts charts
+        └── ComparisonTable.jsx        # Side-by-side table
 ```
 
 ---

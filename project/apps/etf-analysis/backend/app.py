@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
@@ -14,8 +14,36 @@ import shutil
 from pathlib import Path
 from datetime import datetime
 import asyncio
+import logging
+import re
 
-app = FastAPI(title="ETF Analyzer")
+# The interactive API docs (/docs, /redoc, /openapi.json) are a map of every
+# endpoint for anyone who finds the site. Off by default; set
+# RAED_FINANCE_API_DOCS=1 to turn them on while developing.
+_DOCS = os.environ.get("RAED_FINANCE_API_DOCS") == "1"
+app = FastAPI(
+    title="ETF Analyzer",
+    docs_url="/docs" if _DOCS else None,
+    redoc_url="/redoc" if _DOCS else None,
+    openapi_url="/openapi.json" if _DOCS else None,
+)
+log = logging.getLogger("etf-analysis")
+
+# Symbols look like VOO, BRK-B, 2222.SR, ^GSPC or EURUSD=X.
+SYMBOL_RE = re.compile(r"^[A-Za-z0-9.\-=^_]{1,20}$")
+MAX_BODY_BYTES = 64 * 1024     # the largest real request (a portfolio) is a few KB
+MAX_WATCHLIST = 200
+MAX_ALERTS = 200
+MAX_PORTFOLIOS = 100
+
+
+def server_error(what: str, exc: Exception) -> HTTPException:
+    """Log the real error on the server, send the browser a generic message.
+
+    Raw exception text can reveal file paths, library versions and internals.
+    """
+    log.warning("%s failed: %r", what, exc)
+    return HTTPException(status_code=500, detail=f"{what} failed. Please try again later.")
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 
@@ -27,15 +55,31 @@ async def health():
 @app.get("/api/storage-info")
 async def storage_info():
     # Exposes only the storage mode, not private file contents. Useful for diagnostics.
-    return {"persistent": True, "data_dir": str(USER_DATA_DIR)}
+    # The folder path is not returned: it contains the Windows user name.
+    return {"persistent": True}
 
 
 @app.middleware("http")
 async def add_security_headers(request, call_next):
+    # Reject oversized bodies and malformed symbols in the URL before any
+    # route runs, so junk never reaches Yahoo, the cache or the data files.
+    try:
+        if int(request.headers.get("content-length") or 0) > MAX_BODY_BYTES:
+            return JSONResponse({"detail": "Request body too large."}, status_code=413)
+    except ValueError:
+        return JSONResponse({"detail": "Invalid Content-Length."}, status_code=400)
+    path = request.url.path
+    if path.startswith("/api/"):
+        parts = [p for p in path[5:].split("/") if p]
+        if len(path) > 200 or any(not SYMBOL_RE.match(p) for p in parts):
+            return JSONResponse({"detail": "Invalid symbol or path."}, status_code=400)
     response: Response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
-    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self' https://query1.finance.yahoo.com"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdn.jsdelivr.net cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self' https://query1.finance.yahoo.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
     return response
 
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
@@ -75,22 +119,25 @@ def _valid_json(path: Path, expected_key: str):
 
 
 def _legacy_candidates(filename: str):
-    """Find an older extracted suite copy only for one-time migration."""
+    """Find an older extracted suite copy only for one-time migration.
+
+    Only folders named Raed-Finance-Suite* next to this copy are checked, in
+    the old layout (<suite>/apps/...) and the current one (<suite>/project/apps/...).
+    Unrelated folders (e.g. the whole Downloads folder) are never scanned.
+    """
     current = (BUNDLED_DATA_DIR / filename).resolve()
     seen = set()
     candidates = []
 
-    # Sibling extracted suite folders are the common upgrade path.
-    suite_root = BUNDLED_DATA_DIR.parents[2]  # .../Raed-Finance-Suite-*/
-    parent = suite_root.parent
-    for pattern_root in (parent, Path.home() / "Downloads"):
+    # backend -> etf-analysis -> apps -> <suite or project> -> <suite>
+    roots = {BUNDLED_DATA_DIR.parents[2].parent, BUNDLED_DATA_DIR.parents[3].parent}
+    for pattern_root in roots:
         if not pattern_root.exists():
             continue
         try:
             patterns = (
                 f"Raed-Finance-Suite*/apps/etf-analysis/backend/{filename}",
-                f"*/apps/etf-analysis/backend/{filename}",
-                f"*/*/apps/etf-analysis/backend/{filename}",
+                f"Raed-Finance-Suite*/project/apps/etf-analysis/backend/{filename}",
             )
             for pattern in patterns:
                 for path in pattern_root.glob(pattern):
@@ -210,7 +257,7 @@ async def analyze_etf(symbol: str):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch data for '{symbol}': {str(e)}")
+        raise server_error("Request", e)
 
 
 @app.get("/api/composition/{symbol}")
@@ -234,7 +281,7 @@ async def get_composition(symbol: str):
     except Exception as e:
         # Composition is supplementary. Return a clean error rather than making
         # the whole ETF analysis unusable.
-        raise HTTPException(status_code=500, detail=f"Failed to fetch composition for '{symbol}': {str(e)}")
+        raise server_error("Request", e)
 
 
 @app.get("/api/quote/{symbol}")
@@ -252,7 +299,7 @@ async def get_quote(symbol: str):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch quote for '{symbol}': {str(e)}")
+        raise server_error("Request", e)
 
 
 @app.get("/api/history/{symbol}")
@@ -266,7 +313,7 @@ async def get_price_history(symbol: str, period: str = Query("1y", pattern="^(1m
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch history for '{symbol}': {str(e)}")
+        raise server_error("Request", e)
 
 
 @app.get("/api/risk/{symbol}")
@@ -275,7 +322,7 @@ async def get_risk(symbol: str, period: str = Query("3y", pattern="^(1y|2y|3y|5y
     try:
         return await run_in_threadpool(etf_data.get_risk_metrics, symbol, period)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 @app.get("/api/dividends/{symbol}")
@@ -284,7 +331,7 @@ async def get_dividends(symbol: str):
     try:
         return {"symbol": symbol, "dividends": await run_in_threadpool(etf_data.get_dividend_history, symbol)}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 @app.get("/api/technical/{symbol}")
@@ -293,7 +340,7 @@ async def get_technical(symbol: str, period: str = Query("1y", pattern="^(6mo|1y
     try:
         return await run_in_threadpool(etf_data.get_technical_indicators, symbol, period)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 @app.get("/api/news/{symbol}")
@@ -302,7 +349,7 @@ async def get_news(symbol: str):
     try:
         return {"symbol": symbol, "news": await run_in_threadpool(etf_data.get_news, symbol)}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 @app.get("/api/movers")
@@ -310,12 +357,12 @@ async def get_movers(limit: int = Query(10, ge=3, le=20)):
     try:
         return await run_in_threadpool(etf_data.get_top_movers, limit)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 class CompareRequest(BaseModel):
-    symbol_a: str
-    symbol_b: str
+    symbol_a: str = Field(max_length=20)
+    symbol_b: str = Field(default="", max_length=20)
 
 
 @app.post("/api/compare")
@@ -349,11 +396,11 @@ async def compare_etfs(req: CompareRequest):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Comparison failed: {str(e)}")
+        raise server_error("Request", e)
 
 
 class MultiCompareRequest(BaseModel):
-    symbols: List[str]
+    symbols: List[str] = Field(max_length=10)
 
 
 @app.post("/api/multi-compare")
@@ -361,6 +408,8 @@ async def multi_compare(req: MultiCompareRequest):
     symbols = [s.strip().upper() for s in req.symbols if s.strip()]
     if len(symbols) < 2:
         raise HTTPException(status_code=400, detail="At least 2 symbols required.")
+    if any(not SYMBOL_RE.match(s) for s in symbols):
+        raise HTTPException(status_code=400, detail="Invalid symbol.")
     if len(symbols) > 5:
         raise HTTPException(status_code=400, detail="Maximum 5 symbols allowed.")
 
@@ -376,11 +425,11 @@ async def multi_compare(req: MultiCompareRequest):
             metrics[sym] = {} if isinstance(value, Exception) else value
         return {"performance": perf, "correlation": corr, "metrics": metrics}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 class CorrelationRequest(BaseModel):
-    symbols: List[str]
+    symbols: List[str] = Field(max_length=10)
 
 
 @app.post("/api/correlation")
@@ -388,10 +437,12 @@ async def get_correlation(req: CorrelationRequest):
     symbols = [s.strip().upper() for s in req.symbols if s.strip()]
     if len(symbols) < 2:
         raise HTTPException(status_code=400, detail="At least 2 symbols required.")
+    if len(symbols) > 10 or any(not SYMBOL_RE.match(s) for s in symbols):
+        raise HTTPException(status_code=400, detail="Up to 10 valid symbols allowed.")
     try:
         return await run_in_threadpool(etf_data.get_correlation, symbols)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 # Watchlist endpoints
@@ -404,7 +455,11 @@ async def get_watchlist():
 async def add_to_watchlist(req: CompareRequest):
     data = load_json_file(WATCHLIST_FILE, {"symbols": []})
     sym = req.symbol_a.strip().upper()
-    if sym and sym not in data["symbols"]:
+    if not SYMBOL_RE.match(sym):
+        raise HTTPException(status_code=400, detail="Invalid symbol.")
+    if sym not in data["symbols"]:
+        if len(data["symbols"]) >= MAX_WATCHLIST:
+            raise HTTPException(status_code=400, detail=f"Watchlist is full ({MAX_WATCHLIST} symbols).")
         data["symbols"].append(sym)
         save_json_file(WATCHLIST_FILE, data)
     return data
@@ -422,8 +477,8 @@ async def remove_from_watchlist(req: CompareRequest):
 
 # Alerts endpoints
 class AlertRequest(BaseModel):
-    symbol: str = Field(min_length=1, max_length=20)
-    target_price: float = Field(gt=0)
+    symbol: str = Field(min_length=1, max_length=20, pattern=r"^\s*[A-Za-z0-9.\-=^_]{1,20}\s*$")
+    target_price: float = Field(gt=0, lt=1e9)
     direction: Literal["above", "below"]
 
 
@@ -435,6 +490,8 @@ async def get_alerts():
 @app.post("/api/alerts/add")
 async def add_alert(req: AlertRequest):
     data = load_json_file(ALERTS_FILE, {"alerts": []})
+    if len(data["alerts"]) >= MAX_ALERTS:
+        raise HTTPException(status_code=400, detail=f"Too many alerts (max {MAX_ALERTS}).")
     sym = req.symbol.strip().upper()
     alert = {
         "symbol": sym,
@@ -460,7 +517,7 @@ async def remove_alert(req: AlertRequest):
 
 
 @app.get("/api/alerts/check")
-async def check_alerts():
+def check_alerts():
     data = load_json_file(ALERTS_FILE, {"alerts": []})
     triggered = []
     remaining = []
@@ -485,14 +542,14 @@ async def check_alerts():
 
 # Portfolio endpoints
 class PortfolioHolding(BaseModel):
-    symbol: str = Field(min_length=1, max_length=20)
-    shares: float = Field(gt=0)
-    avgPrice: Optional[float] = Field(default=0, ge=0)
+    symbol: str = Field(min_length=1, max_length=20, pattern=r"^\s*[A-Za-z0-9.\-=^_]{1,20}\s*$")
+    shares: float = Field(gt=0, lt=1e12)
+    avgPrice: Optional[float] = Field(default=0, ge=0, lt=1e9)
 
 
 class PortfolioRequest(BaseModel):
     name: str = Field(min_length=1, max_length=100)
-    holdings: List[PortfolioHolding] = Field(min_length=1, max_length=100)
+    holdings: List[PortfolioHolding] = Field(min_length=1, max_length=50)
 
 
 @app.get("/api/portfolio")
@@ -501,8 +558,10 @@ async def get_portfolio():
 
 
 @app.post("/api/portfolio/save")
-async def save_portfolio(req: PortfolioRequest):
+def save_portfolio(req: PortfolioRequest):
     data = load_json_file(PORTFOLIO_FILE, {"portfolios": []})
+    if len(data["portfolios"]) >= MAX_PORTFOLIOS:
+        raise HTTPException(status_code=400, detail=f"Too many saved portfolios (max {MAX_PORTFOLIOS}).")
     holdings_data = []
     total_value = 0
     total_cost = 0
@@ -573,7 +632,7 @@ async def get_report_data(symbol: str):
             "generated_at": datetime.now().isoformat(),
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 # === Saudi ETF Endpoints ===
@@ -581,12 +640,12 @@ from backend import saudi_etf
 
 
 @app.get("/api/saudi/list")
-async def get_saudi_etf_list():
+def get_saudi_etf_list():
     return {"etfs": saudi_etf.get_saudi_etf_list()}
 
 
 @app.get("/api/saudi/{symbol}")
-async def analyze_saudi_etf(symbol: str):
+def analyze_saudi_etf(symbol: str):
     symbol = symbol.strip().upper()
     if not symbol:
         raise HTTPException(status_code=400, detail="Symbol is required.")
@@ -602,37 +661,37 @@ async def analyze_saudi_etf(symbol: str):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 @app.get("/api/saudi/history/{symbol}")
-async def get_saudi_etf_history(symbol: str, period: str = Query("1y", pattern="^(1mo|3mo|6mo|1y|2y|5y)$")):
+def get_saudi_etf_history(symbol: str, period: str = Query("1y", pattern="^(1mo|3mo|6mo|1y|2y|5y)$")):
     symbol = symbol.strip().upper()
     try:
         data = saudi_etf.get_saudi_etf_history(symbol, period)
         return {"symbol": symbol, "period": period, "data": data}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 @app.get("/api/saudi/holdings/{symbol}")
-async def get_saudi_etf_holdings(symbol: str):
+def get_saudi_etf_holdings(symbol: str):
     """Get holdings for a Saudi ETF or REIT."""
     symbol = symbol.strip().upper()
     try:
         holdings = saudi_etf.get_saudi_etf_holdings(symbol)
         return {"symbol": symbol, "holdings": holdings}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 class SaudiCompareRequest(BaseModel):
-    symbol_a: str
-    symbol_b: str
+    symbol_a: str = Field(max_length=20)
+    symbol_b: str = Field(max_length=20)
 
 
 @app.post("/api/saudi/compare")
-async def compare_saudi_etfs(req: SaudiCompareRequest):
+def compare_saudi_etfs(req: SaudiCompareRequest):
     sym_a = req.symbol_a.strip().upper()
     sym_b = req.symbol_b.strip().upper()
     if not sym_a or not sym_b:
@@ -644,7 +703,7 @@ async def compare_saudi_etfs(req: SaudiCompareRequest):
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise server_error("Request", e)
 
 
 # Mutual Funds (صناديق الاستثمار العامة)
@@ -662,6 +721,20 @@ def load_mutual_funds():
         else:
             _MUTUAL_FUNDS_CACHE = []
     return _MUTUAL_FUNDS_CACHE
+
+
+def mutual_funds_as_of():
+    """Latest valuation date in the bundled dataset (YYYY/MM/DD), or None.
+
+    The mutual-fund list is a static snapshot shipped with the app, so the UI
+    shows this date to make clear how old the numbers are.
+    """
+    dates = []
+    for f in load_mutual_funds():
+        parts = str(f.get("valuationDate", "")).strip().replace("-", "/").split("/")
+        if len(parts) == 3 and all(p.isdigit() for p in parts):
+            dates.append(f"{int(parts[0]):04d}/{int(parts[1]):02d}/{int(parts[2]):02d}")
+    return max(dates) if dates else None
 
 
 @app.get("/api/mutual-funds")
@@ -734,6 +807,7 @@ async def get_mutual_funds(
         "page": page,
         "page_size": page_size,
         "total_pages": (total + page_size - 1) // page_size,
+        "data_as_of": mutual_funds_as_of(),
         "funds": paginated_funds,
         "filters": {
             "currencies": sorted(currencies),
@@ -777,6 +851,7 @@ async def get_mutual_funds_stats():
     return {
         "total_funds": total_funds,
         "total_nav": total_nav,
+        "data_as_of": mutual_funds_as_of(),
         "currencies": currencies,
         "objectives": objectives,
         "top_funds": top_funds

@@ -15,8 +15,43 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+// Don't advertise the framework ("X-Powered-By: Express") to scanners.
+app.disable("x-powered-by");
+
+// Behind a reverse proxy (nginx, Caddy, Hostinger) every request arrives from
+// the proxy's IP, so the rate limit would hit all visitors at once. Set
+// TRUST_PROXY=1 only when such a proxy is in front; then the real client IP
+// from X-Forwarded-For is used. Never set it without a proxy: clients could
+// fake that header to dodge the limit.
+if (process.env.TRUST_PROXY) app.set("trust proxy", Number(process.env.TRUST_PROXY) || 1);
+
+app.use((req, res, next) => {
+  res.set({
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+  });
+  next();
+});
 app.use(limiter);
-app.use(cors());
+
+// Only the Stock Comparison page may call this API from a browser. Before,
+// cors() allowed every website, so any page a visitor opened could use this
+// server (and its Yahoo quota) through their browser. Extra origins, such as
+// a public domain, go in ALLOWED_ORIGINS, comma-separated.
+const ALLOWED_ORIGINS = new Set([
+  "http://127.0.0.1:5174",
+  "http://localhost:5174",
+  ...String(process.env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean),
+]);
+app.use(cors({
+  origin: (origin, cb) => cb(null, !origin || ALLOWED_ORIGINS.has(origin)),
+  methods: ["GET"],
+}));
+app.use((req, res, next) => (req.method === "GET" || req.method === "OPTIONS" || req.method === "HEAD")
+  ? next()
+  : res.status(405).json({ error: "Method not allowed." }));
 
 // ─── Cache ──────────────────────────────────────────────────────────────────
 const cache = new Map();
@@ -42,15 +77,58 @@ function setCache(key, data) {
   }
 }
 
+// ─── Input & Errors ─────────────────────────────────────────────────────────
+
+// Letters/digits plus the separators Yahoo uses: BRK-B, 2222.SR, ^GSPC, EURUSD=X
+const TICKER_RE = /^[A-Z0-9^][A-Z0-9.\-=^]{0,14}$/;
+
+class NotFoundError extends Error {}
+
+// Returns the cleaned ticker, or sends a 400 and returns null.
+function readTicker(req, res) {
+  const ticker = String(req.params.ticker || "").trim().toUpperCase();
+  if (!TICKER_RE.test(ticker)) {
+    res.status(400).json({ error: "Invalid symbol. Use letters, digits, '.', '-', '^' or '=' (max 15 characters)." });
+    return null;
+  }
+  return ticker;
+}
+
+const NETWORK_CODES = new Set(["ENOTFOUND", "EAI_AGAIN", "ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT"]);
+
+function isNetworkError(err) {
+  const code = err?.code || err?.cause?.code;
+  return NETWORK_CODES.has(code) || /fetch failed|network|timed? ?out|socket/i.test(err?.message || "");
+}
+
+function isNotFound(err) {
+  return err instanceof NotFoundError || /not found|no data|delisted|invalid (symbol|ticker)/i.test(err?.message || "");
+}
+
+// Tell the user whether the symbol is wrong or the data source is unreachable.
+function sendError(res, err, ticker, what) {
+  if (isNotFound(err)) {
+    return res.status(404).json({ error: `Ticker "${ticker}" was not found.` });
+  }
+  if (isNetworkError(err)) {
+    return res.status(503).json({ error: "Market data source is unreachable. Check your internet connection and try again." });
+  }
+  return res.status(502).json({ error: `Could not load ${what} for "${ticker}". The data source may be temporarily unavailable.` });
+}
+
 // ─── API Routes ─────────────────────────────────────────────────────────────
 
 app.get("/api/stock/:ticker", async (req, res) => {
-  const ticker = String(req.params.ticker || "").trim().toUpperCase();
+  const ticker = readTicker(req, res);
+  if (!ticker) return;
   const cached = getCached(`stock:${ticker}`);
   if (cached) return res.json(cached);
 
   try {
     const quote = await yf.quote(ticker);
+    if (!quote || (quote.regularMarketPrice == null && !quote.shortName && !quote.longName)) {
+      throw new NotFoundError(`No quote for ${ticker}`);
+    }
     let sum = {};
     try {
       sum = await yf.quoteSummary(ticker, {
@@ -113,12 +191,13 @@ app.get("/api/stock/:ticker", async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error(`Error ${ticker}:`, err.message);
-    res.status(404).json({ error: `Ticker "${ticker}" was not found.` });
+    sendError(res, err, ticker, "stock data");
   }
 });
 
 app.get("/api/history/:ticker", async (req, res) => {
-  const ticker = String(req.params.ticker || "").trim().toUpperCase();
+  const ticker = readTicker(req, res);
+  if (!ticker) return;
   const cached = getCached(`history:${ticker}`);
   if (cached) return res.json(cached);
 
@@ -141,12 +220,13 @@ app.get("/api/history/:ticker", async (req, res) => {
     res.json(data);
   } catch (err) {
     console.error(`History ${ticker}:`, err.message);
-    res.status(404).json({ error: "Historical data is unavailable." });
+    sendError(res, err, ticker, "historical data");
   }
 });
 
 app.get("/api/earnings/:ticker", async (req, res) => {
-  const ticker = String(req.params.ticker || "").trim().toUpperCase();
+  const ticker = readTicker(req, res);
+  if (!ticker) return;
   const cached = getCached(`earnings:${ticker}`);
   if (cached) return res.json(cached);
 

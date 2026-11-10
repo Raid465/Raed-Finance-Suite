@@ -2,8 +2,6 @@
 
 body {
   margin: 0;
-  background: #0f1117;
-  color: #e8e8f0;
   font-family: system-ui, -apple-system, sans-serif;
 }
 
@@ -29,16 +27,29 @@ input[type="number"] {
   top: 14px;
   right: 16px;
   padding: 8px 12px;
-  border: 1px solid #2e3350;
+  border: 1px solid var(--rf-border);
   border-radius: 6px;
-  background: #1a1d2e;
-  color: #e8e8f0;
+  background: var(--rf-surface);
+  color: var(--rf-text);
   font: inherit;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
-.global-lang-toggle:hover { background: #222640; border-color:#4f8cff; }
+.global-lang-toggle:hover { background: var(--rf-surface); border-color:#2563eb; }
 html[dir="rtl"] .global-lang-toggle { right: auto; left: 16px; }
 
-button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #4f8cff;outline-offset:2px}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid #2563eb;outline-offset:2px}
+
+/* Theme tokens (Clean Light by default, dark via public/rf-theme.js) */
+:root{--rf-bg:#f6f7f9;--rf-surface:#f1f3f6;--rf-card:#ffffff;--rf-border:#e3e6eb;--rf-axis:#cbd2da;--rf-text:#1a1f2b;--rf-muted:#5b6472}
+html[data-theme="dark"]{--rf-bg:#0f1420;--rf-surface:#161c29;--rf-card:#1a2130;--rf-border:#2a3140;--rf-axis:#3a4354;--rf-text:#e6e9ef;--rf-muted:#9aa4b2;color-scheme:dark}
+body{background:var(--rf-bg);color:var(--rf-text)}
+/* Recharts draws grid/axis colors as SVG attributes; CSS overrides them so they follow the theme. */
+.recharts-cartesian-grid line{stroke:var(--rf-border)}
+.recharts-cartesian-axis-line,.recharts-cartesian-axis-tick-line{stroke:var(--rf-axis)}
+.recharts-cartesian-axis-tick-value,.recharts-cartesian-axis-tick text,.recharts-polar-angle-axis-tick text,.recharts-legend-item-text{fill:var(--rf-muted)}
+.rf-theme-toggle{display:inline-flex;align-items:center;gap:6px;position:fixed;top:14px;right:112px;z-index:10000;padding:8px 12px;border:1px solid var(--rf-border);border-radius:6px;background:var(--rf-card);color:var(--rf-text);font-family:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+.rf-theme-toggle:hover{border-color:#2563eb}
+html[dir="rtl"] .rf-theme-toggle{right:auto;left:112px}
+.rf-theme-toggle.rf-docked{position:static;border-radius:8px;font-size:12px;font-weight:700;padding:8px 14px}

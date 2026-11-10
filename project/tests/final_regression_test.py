@@ -8,6 +8,8 @@ import json, re, sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _sources import etf_page, stock_ui, investment_app
 results=[]
 def check(name, cond, detail=''):
     results.append(bool(cond))
@@ -29,7 +31,7 @@ for app_name in ('investment-calculator','stock-comparison-tool'):
 text_ext={'.py','.js','.jsx','.ts','.tsx','.html','.css','.json'}
 cjk=[]
 for p in ROOT.rglob('*'):
-    if not p.is_file() or p.suffix.lower() not in text_ext or 'node_modules' in p.parts:
+    if not p.is_file() or p.suffix.lower() not in text_ext or 'node_modules' in p.parts or '.venv' in p.parts or 'dist' in p.parts:
         continue
     try: text=p.read_text(encoding='utf-8')
     except Exception: continue
@@ -41,10 +43,10 @@ check('No accidental CJK/corrupt characters remain', not cjk, ', '.join(cjk[:5])
 # Dashboard blue/English
 D=(ROOT/'launcher/dashboard.html').read_text(encoding='utf-8')
 check('Dashboard is English by default', '<html lang="en" dir="ltr">' in D and "let l='en'" in D)
-check('Dashboard Open buttons are forced blue', 'background:#2563eb!important' in D.replace(' ',''))
+check('Dashboard Open buttons are blue', '--primary:#2563eb' in D.replace(' ','') and 'a.btn{' in D.replace(' ','') and 'background:var(--primary)' in D.replace(' ',''))
 
 # ETF UI/localization/data preservation
-E=(ROOT/'apps/etf-analysis/frontend/index.html').read_text(encoding='utf-8')
+E=etf_page()
 for pair in [
     "['الدخل','Income']",
     "['المحافظة على رأس المال','Capital Preservation']",
@@ -52,8 +54,10 @@ for pair in [
     "['نمو و الدخل','Growth & Income']",
 ]:
     check(f'ETF translation exists: {pair}', pair in E)
-check('Mutual fund names are excluded from generic translation', 'data-no-translate>${f.name}</' in E)
-check('Fund managers are excluded from generic translation', 'data-no-translate>${f.fundManager}</' in E)
+check('Mutual fund names are excluded from generic translation', 'data-no-translate>${esc(f.name)}</' in E)
+check('Fund managers are excluded from generic translation', 'data-no-translate>${esc(f.fundManager)}</' in E)
+check('ETF page escapes external text before innerHTML', 'function esc(' in E and '${esc(n.title)}' in E and '${esc(h.name)}' in E)
+check('ETF news links only open http(s) URLs', 'function safeUrl(' in E and "onclick=\"window.open('${n.url}'" not in E)
 check('Translation walker skips protected proper names', '[data-no-translate]' in E and "closest('.lang-toggle,script,style,[data-no-translate]')" in E)
 fn_names=re.findall(r'\b(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(', E)
 dups=sorted({n for n in fn_names if fn_names.count(n)>1})
@@ -67,11 +71,11 @@ ED=(ROOT/'apps/etf-analysis/backend/etf_data.py').read_text(encoding='utf-8')
 check('Mutual-fund requests do not mutate shared cached list', 'funds = list(load_mutual_funds())' in A)
 check('ETF YTD decimal return is converted to percent', 'round(ytd_return * 100, 2)' in ED)
 check('Alert direction is validated', 'Literal["above", "below"]' in A)
-check('Portfolio shares must be positive', 'shares: float = Field(gt=0)' in A)
+check('Portfolio shares must be positive', 'shares: float = Field(gt=0' in A)
 check('Watchlist user data is persistent outside extracted project', 'RaedFinanceSuite' in A and 'USER_DATA_DIR' in A)
 
 # Investment English coverage: every Arabic source literal must be covered by UI mapping.
-IAPP=(ROOT/'apps/investment-calculator/src/App.tsx').read_text(encoding='utf-8')
+IAPP=investment_app()
 IL=(ROOT/'apps/investment-calculator/src/uiLanguage.ts').read_text(encoding='utf-8')
 pairs=re.findall(r"\['((?:\\'|[^'])*)','((?:\\'|[^'])*)'\]",IL)
 keys=sorted([a.replace("\\'", "'") for a,_ in pairs], key=len, reverse=True)
@@ -85,7 +89,7 @@ check('Investment English translation covers all Arabic UI source text', not res
 check('Investment JOD defaults to English formatting', "JOD: { symbol: 'JOD', locale: 'en-JO', code: 'JOD' }" in IAPP)
 
 # Stock reliability/local host/default English
-SC=(ROOT/'apps/stock-comparison-tool/src/components/StockComparisonTool.jsx').read_text(encoding='utf-8')
+SC=stock_ui()
 SS=(ROOT/'apps/stock-comparison-tool/server.js').read_text(encoding='utf-8')
 check('Stock UI defaults to English', 'useState("en")' in SC)
 check('Stock browser API uses exact IPv4 host used by launcher', 'http://127.0.0.1:3001/api' in SC and 'http://localhost:3001/api' not in SC)
@@ -124,6 +128,17 @@ try:
         check(name+' rejected', r.status_code==422, f'HTTP {r.status_code}')
 except Exception as exc:
     check('ETF validation harness loads', False, repr(exc))
+
+# Bugs found in the full feature walkthrough (2026-11-09).
+CORE=(ROOT/'apps/etf-analysis/frontend/js/core.js').read_text(encoding='utf-8')
+check('Saudi compare can use the shared cm() tile helper (defined at top level in core.js)', re.search(r'^function cm\(', CORE, re.M) is not None)
+check('Market movers does not cache an empty (failed) Yahoo result', 'if gainers or losers:' in ED)
+check('Market movers shows a message when no data comes back', 'بيانات السوق غير متاحة حالياً' in E)
+check('Mutual-fund stats labels the fund count correctly', 'عدد الصناديق</div><div class="v">${d.total_funds}' in E)
+check('Stock UI shows specific, translated errors per HTTP status', all(k in SC for k in ('errInvalid','errNotFound','errOffline','errServer','e.status === 400','e.status === 404')))
+SIDX=(ROOT/'apps/stock-comparison-tool/index.html').read_text(encoding='utf-8')
+IIDX=(ROOT/'apps/investment-calculator/index.html').read_text(encoding='utf-8')
+check('React app pages have real English titles', '<title>Stock Comparison Tool</title>' in SIDX and '<html lang="en" dir="ltr">' in SIDX and '<title>Investment Calculator</title>' in IIDX)
 
 passed=all(results)
 print('\nFINAL REGRESSION RESULT:', 'ALL CHECKS PASSED' if passed else 'FAILURES FOUND')

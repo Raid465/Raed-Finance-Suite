@@ -32,6 +32,19 @@ if errorlevel 1 (
     exit /b 1
 )
 
+rem Use a private virtual environment so the suite never changes the
+rem packages of the system Python (and other projects can't break it).
+if not exist ".venv\Scripts\python.exe" (
+    echo Creating the project's Python environment ^(.venv^)...
+    %PYTHON_CMD% -m venv .venv
+    if errorlevel 1 (
+        echo ERROR: Could not create the Python virtual environment.
+        pause
+        exit /b 1
+    )
+)
+set "PYTHON_CMD=.venv\Scripts\python.exe"
+
 echo [2/4] Checking Node.js and npm...
 where node >nul 2>nul
 if errorlevel 1 (
@@ -86,6 +99,8 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
+rem start_all.py --install installs dependencies AND runs the suite, so
+rem when it returns the user has already stopped it: don't start it again.
 exit /b 0
 
 :START

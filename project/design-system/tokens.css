@@ -1,24 +1,27 @@
+/* Raed Finance Suite - Clean Light theme tokens.
+   Every app uses these values (the ETF page as CSS variables, the React
+   apps through theme.js / Tailwind arbitrary values). */
 :root {
-  --etf-bg: #0f1117;
-  --etf-surface: #1a1d2e;
-  --etf-card: #222640;
-  --etf-input: #2a2e4a;
-  --etf-border: #2e3350;
-  --etf-text: #e8e8f0;
-  --etf-text-muted: #a0a0b8;
-  --etf-primary: #2563eb;
-  --etf-primary-hover: #1d4ed8;
-  --etf-success: #34d399;
-  --etf-danger: #f87171;
-  --etf-warning: #fbbf24;
-  --etf-accent-2: #fb923c;
-  --etf-radius-sm: 6px;
-  --etf-radius-md: 8px;
-  --etf-radius-lg: 12px;
-  --etf-space-1: 4px;
-  --etf-space-2: 8px;
-  --etf-space-3: 12px;
-  --etf-space-4: 16px;
-  --etf-space-5: 24px;
-  --etf-space-6: 32px;
+  --rf-bg: #f6f7f9;          /* page background */
+  --rf-surface: #f1f3f6;     /* metric tiles, secondary panels */
+  --rf-card: #ffffff;        /* cards, inputs */
+  --rf-border: #e3e6eb;
+  --rf-text: #1a1f2b;
+  --rf-text-muted: #5b6472;
+  --rf-primary: #2563eb;
+  --rf-primary-hover: #1d4ed8;
+  --rf-success: #15803d;     /* gains */
+  --rf-danger: #dc2626;      /* losses */
+  --rf-warning: #b45309;
+  --rf-accent-2: #ea580c;    /* second series in comparisons */
+  --rf-shadow: 0 4px 24px rgba(15, 23, 42, .06);
+  --rf-radius-sm: 6px;
+  --rf-radius-md: 8px;
+  --rf-radius-lg: 12px;
+  --rf-space-1: 4px;
+  --rf-space-2: 8px;
+  --rf-space-3: 12px;
+  --rf-space-4: 16px;
+  --rf-space-5: 24px;
+  --rf-space-6: 32px;
 }
